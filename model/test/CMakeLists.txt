@@ -1,0 +1,7 @@
+include_directories(${model_SOURCE_DIR}/include)
+#set(GTest_DIR ${CMAKE_SOURCE_DIR}/lib)
+#set(GTEST_ROOT ${CMAKE_SOURCE_DIR}/lib/gtest)
+find_package(GTest REQUIRED PATHS ${CMAKE_SOURCE_DIR}/lib/gtest)
+add_executable(runModelTests ControllerTest.cpp)
+target_link_libraries(runModelTests GTest::gtest GTest::gtest_main)
+target_link_libraries(runModelTests model)
