@@ -41,13 +41,27 @@ class ViewBuilder{
 
         UU::pad2square(car_img);
         UU::pad2square(alpha);
+
+        /* get car into intial position, to match image and initial pose */
+        UU::rotateSimple(car_img, car_img, 180);
+        UU::rotateSimple(alpha, alpha, 180);
     }
 
     void drawCarAt(epi::Pose pose){
         UU::rotateSimple(car_img, car_r, pose.phi);
         UU::rotateSimple(alpha, alpha_r, pose.phi);
-        UU::overlayImage(map, car_r, alpha_r, dst, Point(pose.x,pose.y));
+        /* opencv uses a slightly different coordinate system:
+         * y-axis points into the opposite direction. Hence the
+         * sign reversal.
+         * */
+
+        UU::overlayImage(map, car_r, alpha_r, dst, Point(pose.x,-pose.y));
         imshow( "Display window", dst );                // Show our image inside it.
+    }
+
+    void onPoseUpdate(epi::Pose pose){
+        cout<<"Pose changed to " << pose << "\n";
+        drawCarAt(pose);
     }
 public:
     ViewBuilder(shared_ptr<epi::Vehicle> car) : car{car} {
@@ -55,14 +69,8 @@ public:
         car->pose.onUpdate(&ViewBuilder::onPoseUpdate, this);
     }
 
-    void onPoseUpdate(epi::Pose pose){
-        cout<<"Pose changed to " << pose << "\n";
-        drawCarAt(pose);
-    }
-
     void show(){
         namedWindow( "Display window", WINDOW_FREERATIO ); // Create a window for display.
-        car->pose.set(epi::Pose{0,0,180});
         drawCarAt(car->pose.get());
     }
 };

@@ -3,13 +3,13 @@
 //
 
 #include "data.h"
-#include <math.h>
+#include "UMath.h"
 namespace epi{
     Pose SimpleController::convert (const double longitudinal, const double lateral, const Pose state) const {
-        double rad = d2r(state.phi);
-        return Pose{state.x+longitudinal*cosd(rad)
+        using namespace U::Math;
+        return Pose{state.x+longitudinal*cosd(state.phi)
         , state.y+longitudinal*sind(state.phi)
-        , state.phi+lateral*longitudinal};
+        , state.phi+lateral*longitudinal/1.0};
     };
 
 }

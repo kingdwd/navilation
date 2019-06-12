@@ -46,11 +46,11 @@ double U::Math::cosd(double x) {
             // Use * 1.0 to avoid -0.0
             return cos(d2r(x90));
         case 1:
-            return sin(d2r(x90)* 1.0);
+            return -sin(d2r(x90)* 1.0);
         case 2:
             return -cos(d2r(x90));
         case 3:
-            return sin(d2r(-x90) * 1.0);
+            return sin(d2r(x90) * 1.0);
     }
     return 0.0;
 }

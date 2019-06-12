@@ -7,7 +7,7 @@ include(DownloadProject/DownloadProject)
 
 
 link_libraries(stdc++fs)
-add_subdirectory(Navilation)
+#add_subdirectory(Navilation)
 add_subdirectory(Util)
 add_subdirectory(gui)
 add_subdirectory(model)

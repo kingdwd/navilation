@@ -30,10 +30,12 @@ bool waitUntilEscape(){
     switch (key){
         case Key::i: car->drive(1,0); break;
         case Key::k: car->drive(-1,0); break;
+
         case Key::u: car->drive(1,1); break;
+        case Key::j: car->drive(-1,1); break;
+
         case Key::o: car->drive(1,-1); break;
-        case Key::j: car->drive(-1,-1); break;
-        case Key::l: car->drive(-1,1); break;
+        case Key::l: car->drive(-1,-1); break;
     }
     waitKey(15);
 
