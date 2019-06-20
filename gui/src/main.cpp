@@ -27,12 +27,14 @@ enum Key{
     l = 108,
     u = 117,
     i = 105,
-    o = 111
+    o = 111,
+    h = 104,
+    oe = 246
 };
 bool waitUntilEscape(){
     Clock::time_point t1 = Clock::now();
     int key = waitKey(5);
-    //cout<< "pressed key: " << key << "\n";
+    cout<< "pressed key: " << key << "\n";
 
     switch (key){
         case Key::none: car->drive(0,0); break;
@@ -44,6 +46,9 @@ bool waitUntilEscape(){
 
         case Key::o: car->drive(1,-1); break;
         case Key::l: car->drive(-1,-1); break;
+
+        case Key::h: car->drive(0,1); break;
+        case Key::oe: car->drive(0,-1); break;
     }
     Clock::time_point t2 = Clock::now();
 

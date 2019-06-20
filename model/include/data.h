@@ -87,7 +87,7 @@ namespace epi {
         double a = 1.5;     /* Distance from front axle to COG.  */
         double b = 1.5;     /* Distance from rear axle to COG.  */
         double Cx = 1.5E5;  /* Longitudinal tire stiffness.     */
-        double Cy = 4E4;    /* Lateral tire stiffness.          */
+        double Cy = 4E5;    /* Lateral tire stiffness.          */
         double CA = 1.5;   /* Air resistance coefficient.      */
         double g = 9.81;
         double Cr = 1.0;   /* Rolling resistance coefficient  */
@@ -102,35 +102,36 @@ namespace epi {
         State fxu(State x, const double u_F, const double u_phi) {
 
             using namespace U::Math;
-            std::cout<<"u phi: "<< u_phi<<"\n";
-            double beta =atand(b*tand(u_phi)/(a+b));
-            double cos_Uphi = cosd(u_phi);
-            double sin_Uphi = sind(u_phi);
+            double phi = d2r(u_phi);
+            double beta =atan(b*tan(phi)/(a+b));
+            double cos_Uphi = cos(phi);
+            double sin_Uphi = sin(phi);
             double v_x = x[3];
             double v_y = x[4];
-            double threshold_vx = 1009;
-            std::cout<<"beta: "<< beta <<"\n";
-            double Fw_x = v_x > threshold_vx ? 2*Cy*(u_phi - (v_y+a*x[5])/v_x)*sin_Uphi : 0;
-            double Fw_y = v_x > threshold_vx ? 2*Cx*u_F*sin_Uphi
-                                               + 2*Cy*(u_phi - (v_y +a*x[5])/v_x)*cos_Uphi
-                                               + 2*Cy*(b*x[5] - v_y)/v_x  : 0;
-            double Fw_phi = v_x > threshold_vx ? a*(2*Cx*u_F*sin_Uphi + 2*Cy*(u_phi - (v_y+a*x[5])/v_x)*cos_Uphi)
-                                                 -2*b*Cy*(b*x[5] -v_y)/v_x : 0;
+            double threshold_vx = 1;
+            double Fw_x = abs(v_x) > threshold_vx ? /*2*Cx*u_F*cos_Uphi*/-2*Cy*(phi - (v_y+a*x[5])/abs(v_x)*sin_Uphi) : 0;
+            double Fw_y = abs(v_x) > threshold_vx ? //2*Cx*u_F/500*sin_Uphi
+                                               + 2*Cy*(phi - (v_y +a*x[5])/abs(v_x))*cos_Uphi
+                                               + 2*Cy*(b*x[5] - v_y)/abs(v_x)  : 0;
+            double Fw_phi = abs(v_x) > threshold_vx ? a*(/*2*Cx*u_F/500*sin_Uphi +*/ 2*Cy*(phi - (v_y+a*x[5])/abs(v_x)))
+                                                 -2*b*Cy*(b*x[5] -v_y)/abs(v_x) : 0;
             double sign_v = sgn(v_x);
+            double sign_vy = sgn(v_y*x[5]);
             double v = sign_v*sqrt(v_x*v_x + v_y*v_y);
-            State dx{v_x*cosd(x[2]) - v_y*sind(x[2])// dx
-                    , v_x*sind(x[2]) + v_y*cosd(x[2]) // dy
-                    , v/(b)*sind(beta) //d_phi
-                    , v_y*x[5] + 1/m* (2*Cx*u_F*cos_Uphi
-                                       - Fw_x
-                                       - sign_v*(CA*v*v + Fr))
+            std::cout<<"v_x * dPhi: "<< v_x*x[5]<<"\n";
+            std::cout<<"Fw_y: "<< Fw_y/m<<"\n";
+            State dx{v_x*cos(x[2]) - v_y*sin(x[2])// dx
+                    , v_x*sin(x[2]) + v_y*cos(x[2]) // dy
+                    , sign_v*sqrt(abs(v))/(b)*sin(beta) //d_phi
+                    , v_y*x[5]  + 1/m*(2*Cx*u_F - sign_v*(CA*v*v + Fr))//*cos_Uphi
+                               // + 1/m* (Fw_x)
                     , -v_x*x[5] + 1/m* (Fw_y)
                     ,  4/(m*pow(a+b,2))*(Fw_phi)
             };
             return dx;
         }
         State next(double u_F, double u_phi){
-            x = x + stepSize*runge4(x, u_F/2, 75* u_phi, stepSize);
+            x = x + stepSize*runge4(x, u_F/2, 45* u_phi, stepSize);
             std::cout<<"State: " << x << "\n";
             return x;
         }

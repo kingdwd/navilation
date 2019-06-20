@@ -49,8 +49,9 @@ class ViewBuilder{
     }
 
     void drawCarAt(epi::Pose pose){
-        UU::rotateSimple(car_img, car_r, pose.phi);
-        UU::rotateSimple(alpha, alpha_r, pose.phi);
+        double phi = U::Math::r2d(pose.phi);
+        UU::rotateSimple(car_img, car_r, phi);
+        UU::rotateSimple(alpha, alpha_r, phi);
         /* opencv uses a slightly different coordinate system:
          * y-axis points into the opposite direction. Hence the
          * sign reversal.
