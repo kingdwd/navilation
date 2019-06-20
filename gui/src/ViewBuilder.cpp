@@ -18,6 +18,7 @@ using namespace cv;
 
 class ViewBuilder{
     shared_ptr<epi::Vehicle> car;
+    Mutex _mutex;
     Mat car_img, map, dst, alpha, car_r, alpha_r;
 
     void init(){
@@ -60,6 +61,7 @@ class ViewBuilder{
     }
 
     void onPoseUpdate(epi::Pose pose){
+        std::unique_lock<mutex>(_mutex);
         cout<<"Pose changed to " << pose << "\n";
         drawCarAt(pose);
     }

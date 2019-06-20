@@ -9,6 +9,10 @@ double U::Math::d2r(double d) {
     return (d / 180.0) * ((double) M_PI);
 }
 
+double U::Math::r2d(double radiant) {
+    return radiant/((double) M_PI)*180;
+}
+
 double U::Math::sind(double x) {
     if (!isfinite(x)) {
         return sin(x);
@@ -53,4 +57,12 @@ double U::Math::cosd(double x) {
             return sin(d2r(x90) * 1.0);
     }
     return 0.0;
+}
+
+double U::Math::tand(double degrees) {
+    return tan(d2r(degrees));
+}
+
+double U::Math::atand(double relation) {
+    return r2d(atan(relation));
 }

@@ -5,17 +5,23 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#include <thread>
+#include <chrono>
 #include "UU.h"
 #include "data.h"
 #include "U.h"
 #include "ViewBuilder.cpp"
 
 using namespace std;
+using Clock = std::chrono::high_resolution_clock ;
 using namespace cv;
+using namespace std::literals;
 
-auto car = std::make_shared<epi::Vehicle>(std::make_unique<epi::SimpleController>());
+auto stepSize = 0.01s;
+auto car = std::make_shared<epi::Vehicle>(std::make_unique<epi::DynamicModel>(epi::System(epi::State{0,0,0,0,0,0}, stepSize.count())));
 
 enum Key{
+    none = -1,
     j = 106,
     k = 107,
     l = 108,
@@ -24,10 +30,12 @@ enum Key{
     o = 111
 };
 bool waitUntilEscape(){
-    int key = waitKey(0);
-    cout<< "pressed key: " << key << "\n";
+    Clock::time_point t1 = Clock::now();
+    int key = waitKey(5);
+    //cout<< "pressed key: " << key << "\n";
 
     switch (key){
+        case Key::none: car->drive(0,0); break;
         case Key::i: car->drive(1,0); break;
         case Key::k: car->drive(-1,0); break;
 
@@ -37,7 +45,12 @@ bool waitUntilEscape(){
         case Key::o: car->drive(1,-1); break;
         case Key::l: car->drive(-1,-1); break;
     }
-    waitKey(15);
+    Clock::time_point t2 = Clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 );
+
+    std::this_thread::sleep_for(stepSize - duration);
+    //cout <<"\n millis: state " << duration << "\n";
 
     return key != 27;
 }

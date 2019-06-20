@@ -16,13 +16,16 @@ V U::Var<V>::get() const noexcept { return _v; }
 
 template <class V>
 void U::Var<V>::set(const V newValue) noexcept {
+    if(_v == newValue) return;
     _v = newValue;
+    auto f = [this]{
     auto l = _listeners;
     auto iter = l.begin();
     while(iter != l.end()){
-        (*iter)(newValue);
+        (*iter)(_v);
         iter++;
-    }
+    }};
+    std::async(std::launch::async, f);
 }
 
 

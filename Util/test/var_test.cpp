@@ -72,7 +72,7 @@ TEST(var_test, add_listener){
     U::Var<int> v(42);
     Stud s;
     auto c = [](int v){std::cout << "alter changed : " << v << "\n";};
-    auto subHandle = v.onUpdate(c);
+    auto subHandle = v.onUpdate([](int v){std::cout << "alter changed : " << v << "\n";});
     v.set(1337);
     //subHandle.unsubscribe();
     v.set(42);

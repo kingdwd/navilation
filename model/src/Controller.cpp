@@ -4,12 +4,18 @@
 
 #include "data.h"
 #include "UMath.h"
+#include "StateBlock.cpp"
 namespace epi{
-    Pose SimpleController::convert (const double longitudinal, const double lateral, const Pose state) const {
+    State SimpleController::convert (const double longitudinal, const double lateral, const State state) {
         using namespace U::Math;
-        return Pose{state.x+longitudinal*cosd(state.phi)
-        , state.y+longitudinal*sind(state.phi)
-        , state.phi+lateral*longitudinal/1.0};
+
+        return State{state[0]+longitudinal*cosd(state[2])
+        , state[1]+longitudinal*sind(state[2])
+        , state[2]+lateral*longitudinal/1.0};
     };
+
+    State DynamicModel::convert (const double longitudinal, const double lateral, const State state) {
+        return sys.next(longitudinal, lateral);
+    }
 
 }

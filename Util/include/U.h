@@ -8,6 +8,7 @@
 #include <ostream>
 #include <iostream>
 #include <functional>
+#include <future>
 #include <vector>
 #include <list>
 #include <algorithm>
@@ -96,11 +97,25 @@ namespace U {
         return std::integral_constant<unsigned, sizeof ...(Types)>{};
     }
 
+    /**
+     * utility function for erasing element in given vector
+     * @tparam V value type of the given vector
+     * @param vector where to erase the value from
+     * @param valueToErase
+     */
     template <class V>
-    void erase(std::vector<V>& v, V valueToErase) {
-        v.erase( std::remove( v.begin(), v.end(), valueToErase ), v.end() );
+    void erase(std::vector<V>& vector, V valueToErase) {
+        vector.erase( std::remove( vector.begin(), vector.end(), valueToErase ), vector.end() );
     }
 
+    /**
+     * Utility function for erasing all elements matching the given predicate function
+     * in given vector
+     * @tparam V value type of the given vector
+     * @tparam Predicate
+     * @param v where to erase the values from
+     * @param predicate function accepting V and returning bool
+     */
     template <class V, typename Predicate>
     void erase(std::vector<V>& v, Predicate predicate) {
         v.erase( std::remove_if(v.begin(), v.end(), predicate), v.end() );
@@ -124,7 +139,6 @@ namespace U {
     template <class V >
     class Var{
         V _v;
-        std::list<std::reference_wrapper<const std::function<void(V)>>> _clisteners;
         std::list<std::function<void(V)>> _listeners;
     public:
         Var(V initialValue);

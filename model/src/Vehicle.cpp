@@ -7,5 +7,6 @@
 
 
 void epi::Vehicle::drive(double longitudinal, double lateral) {
-    pose.set(_controller->convert(longitudinal, lateral, pose.get()));
+    state = _controller->convert(longitudinal, lateral, state);
+    pose.set(Pose{state[0], state[1], state[2]});
 }
