@@ -18,7 +18,7 @@ using namespace cv;
 using namespace std::literals;
 
 auto stepSize = 0.01s;
-auto car = std::make_shared<epi::Vehicle>(std::make_unique<epi::DynamicModel>(epi::System(epi::State{0,0,0,0,0,0}, stepSize.count())));
+auto car = std::make_shared<epi::Vehicle>(std::make_unique<epi::DynamicModel>(epi::System(epi::State{0,0,0,0,0}, stepSize.count())));
 
 enum Key{
     none = -1,

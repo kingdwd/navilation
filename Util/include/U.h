@@ -145,7 +145,7 @@ namespace U {
         V get() const noexcept;
 
         template <class Func, class Callee>
-        SubscriptionHandle onUpdate(Func&& callback, Callee&& callee);
+        SubscriptionHandle onUpdate(Callee&& callee, Func&& callback);
 
         SubscriptionHandle onUpdate(const std::function<void(V)>& callback);
 

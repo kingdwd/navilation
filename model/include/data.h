@@ -6,6 +6,7 @@
 #define EPIPHANY_POSE_H
 
 #include "U.h"
+#include "ControlBlock.hpp"
 #include <memory>
 #include <ostream>
 #include <opencv2/core.hpp>
@@ -79,7 +80,7 @@ namespace epi {
     struct DifferentialBlock: public StateBlock<V> {
         DifferentialBlock(V initialValue) : StateBlock<V>(initialValue, [](V a, V b){return b-a;}){};
     };
-    using State = cv::Vec6d;
+    using State = cv::Vec<double, 5>;
 
     class System{
         double stepSize;
@@ -93,10 +94,12 @@ namespace epi {
         double Cr = 1.0;   /* Rolling resistance coefficient  */
         double Fr = m*g*Cr;
         State x;
+        Deadband _deadband;
     public:
         System(const State initialState, const double stepSize) :
                 x{initialState}
                 , stepSize{stepSize}
+                , _deadband{Deadband(800)}
                 {}
 
         State fxu(State x, const double u_F, const double u_phi) {
@@ -108,30 +111,34 @@ namespace epi {
             double sin_Uphi = sin(phi);
             double v_x = x[3];
             double v_y = x[4];
-            double threshold_vx = 1;
-            double Fw_x = abs(v_x) > threshold_vx ? /*2*Cx*u_F*cos_Uphi*/-2*Cy*(phi - (v_y+a*x[5])/abs(v_x)*sin_Uphi) : 0;
-            double Fw_y = abs(v_x) > threshold_vx ? //2*Cx*u_F/500*sin_Uphi
-                                               + 2*Cy*(phi - (v_y +a*x[5])/abs(v_x))*cos_Uphi
-                                               + 2*Cy*(b*x[5] - v_y)/abs(v_x)  : 0;
-            double Fw_phi = abs(v_x) > threshold_vx ? a*(/*2*Cx*u_F/500*sin_Uphi +*/ 2*Cy*(phi - (v_y+a*x[5])/abs(v_x)))
-                                                 -2*b*Cy*(b*x[5] -v_y)/abs(v_x) : 0;
             double sign_v = sgn(v_x);
-            double sign_vy = sgn(v_y*x[5]);
             double v = sign_v*sqrt(v_x*v_x + v_y*v_y);
-            std::cout<<"v_x * dPhi: "<< v_x*x[5]<<"\n";
-            std::cout<<"Fw_y: "<< Fw_y/m<<"\n";
+            double d_phi = v/(a+b)*tan(phi);
+            double dd_phi = _deadband.apply(-v_x*d_phi);
+            double threshold_vx = 2;
+            double Fw_x = abs(v_x) > threshold_vx ? /*2*Cx*u_F*cos_Uphi*/-2*Cy*(phi - (v_y+a*d_phi)/abs(v_x)*sin_Uphi) : 0;
+            double Fw_y = abs(v_x) > threshold_vx ? //2*Cx*u_F/500*sin_Uphi
+                                               + 2*Cy*(phi - (v_y +a*d_phi)/abs(v_x))*cos_Uphi
+                                               + 2*Cy*(b*d_phi - v_y)/abs(v_x)  : 0;
+            double Fw_phi = abs(v_x) > threshold_vx ? a*(/*2*Cx*u_F/500*sin_Uphi +*/ 2*Cy*(phi - (v_y+a*d_phi)/abs(v_x)))
+                                                 -2*b*Cy*(b*d_phi -v_y)/abs(v_x) : 0;
+            double sign_vy = sgn(v_y*d_phi);
+            double sign_y = sgn(v_y);
+            std::cout<<"v_x * dPhi: "<< v_x*d_phi<<"\n";
+            std::cout<<"deadband: "<< dd_phi<<"\n";
             State dx{v_x*cos(x[2]) - v_y*sin(x[2])// dx
                     , v_x*sin(x[2]) + v_y*cos(x[2]) // dy
-                    , sign_v*sqrt(abs(v))/(b)*sin(beta) //d_phi
-                    , v_y*x[5]  + 1/m*(2*Cx*u_F - sign_v*(CA*v*v + Fr))//*cos_Uphi
+                    , d_phi//sign_v*sqrt(abs(v))/(b)*sin(beta) //d_phi
+                    , v_y*d_phi  + 1/m*(2*Cx*u_F - sign_v*(CA*v*v + Fr))//*cos_Uphi
                                // + 1/m* (Fw_x)
-                    , -v_x*x[5] + 1/m* (Fw_y)
-                    ,  4/(m*pow(a+b,2))*(Fw_phi)
+                    , dd_phi -1/m*sign_y*(CA*v*v+m*g*5)//-v_x*d_phi + 1/m* (0*Fw_y)
+
+                    //, 4/(m*pow(a+b,2))*(Fw_phi)
             };
             return dx;
         }
         State next(double u_F, double u_phi){
-            x = x + stepSize*runge4(x, u_F/2, 45* u_phi, stepSize);
+            x = x + stepSize*runge4(x, u_F/2, 30* u_phi, stepSize);
             std::cout<<"State: " << x << "\n";
             return x;
         }

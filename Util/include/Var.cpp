@@ -19,19 +19,17 @@ void U::Var<V>::set(const V newValue) noexcept {
     if(_v == newValue) return;
     _v = newValue;
     auto f = [this]{
-    auto l = _listeners;
-    auto iter = l.begin();
-    while(iter != l.end()){
-        (*iter)(_v);
-        iter++;
-    }};
+        for(auto listener = _listeners.begin(); listener != _listeners.end(); listener++){
+            (*listener)(_v);
+        }
+    };
     std::async(std::launch::async, f);
 }
 
 
 template<class V>
 template<class Func, class Callee>
-U::SubscriptionHandle U::Var<V>::onUpdate(Func &&callback, Callee &&callee) {
+U::SubscriptionHandle U::Var<V>::onUpdate(Callee &&callee, Func&& callback) {
     using namespace std::placeholders;
     std::function<void(V)> cb = std::bind(std::forward<Func>(callback)
             ,std::forward<Callee>(callee)

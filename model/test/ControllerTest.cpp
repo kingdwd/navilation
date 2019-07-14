@@ -39,3 +39,14 @@ TEST(integrator_block, works_as_expected){
     epi::IntegratorBlock<epi::State> i{s};
     EXPECT_EQ(expectedState, i.apply(s));
 }
+
+TEST(deadband_test, deadband_blocks){
+    epi::Deadband deadband(5);
+    EXPECT_EQ(0, deadband.apply(3));
+}
+
+TEST(deadband_test, deadband_passes){
+    epi::Deadband deadband(5);
+    EXPECT_EQ(1, deadband.apply(6));
+    EXPECT_EQ(-1, deadband.apply(-6));
+}

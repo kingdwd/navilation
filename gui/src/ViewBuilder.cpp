@@ -69,7 +69,7 @@ class ViewBuilder{
 public:
     ViewBuilder(shared_ptr<epi::Vehicle> car) : car{car} {
         init();
-        car->pose.onUpdate(&ViewBuilder::onPoseUpdate, this);
+        car->pose.onUpdate(this, &ViewBuilder::onPoseUpdate);
     }
 
     void show(){
