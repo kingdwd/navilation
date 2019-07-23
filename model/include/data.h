@@ -84,18 +84,19 @@ namespace epi {
 
     class System{
         double stepSize;
-        double m = 1700;    /* Vehicle mass.                    */
-        double a = 1.5;     /* Distance from front axle to COG.  */
-        double b = 1.5;     /* Distance from rear axle to COG.  */
-        double Cx = 1.5E5;  /* Longitudinal tire stiffness.     */
-        double Cy = 4E5;    /* Lateral tire stiffness.          */
-        double CA = 1.5;   /* Air resistance coefficient.      */
-        double g = 9.81;
-        double Cr = 1.0;   /* Rolling resistance coefficient  */
-        double Fr = m*g*Cr;
         State x;
         Deadband _deadband;
     public:
+        static constexpr double m = 1700;    /* Vehicle mass.                    */
+        static constexpr double a = 1.5;     /* Distance from front axle to COG.  */
+        static constexpr double b = 1.5;     /* Distance from rear axle to COG.  */
+        static constexpr double Cx = 1.5E5;  /* Longitudinal tire stiffness.     */
+        static constexpr double Cy = 4E5;    /* Lateral tire stiffness.          */
+        static constexpr double CA = 1.5;   /* Air resistance coefficient.      */
+        static constexpr double P = 3E5;     /* Power */
+        static constexpr double g = 9.81;
+        static constexpr double Cr = 1.0;   /* Rolling resistance coefficient  */
+        static constexpr double Fr = m*g*Cr;
         System(const State initialState, const double stepSize) :
                 x{initialState}
                 , stepSize{stepSize}
@@ -105,7 +106,7 @@ namespace epi {
         State fxu(State x, const double u_F, const double u_phi) {
 
             using namespace U::Math;
-            double phi = d2r(u_phi);
+            double phi = u_phi;//d2r(u_phi);
             double beta =atan(b*tan(phi)/(a+b));
             double cos_Uphi = cos(phi);
             double sin_Uphi = sin(phi);
@@ -126,10 +127,10 @@ namespace epi {
             double sign_y = sgn(v_y);
             std::cout<<"v_x * dPhi: "<< v_x*d_phi<<"\n";
             std::cout<<"deadband: "<< dd_phi<<"\n";
-            State dx{v_x*cos(x[2]) - v_y*sin(x[2])// dx
-                    , v_x*sin(x[2]) + v_y*cos(x[2]) // dy
+            State dx{v*cos(x[2]) // dx
+                    , v*sin(x[2]) // dy
                     , d_phi//sign_v*sqrt(abs(v))/(b)*sin(beta) //d_phi
-                    , v_y*d_phi  + 1/m*(2*Cx*u_F - sign_v*(CA*v*v + Fr))//*cos_Uphi
+                    , v_y*d_phi  + 1/m*(P*u_F - sign_v*(CA*v*v + Fr))//*cos_Uphi
                                // + 1/m* (Fw_x)
                     , dd_phi -1/m*sign_y*(CA*v*v+m*g*5)//-v_x*d_phi + 1/m* (0*Fw_y)
 
@@ -138,7 +139,7 @@ namespace epi {
             return dx;
         }
         State next(double u_F, double u_phi){
-            x = x + stepSize*runge4(x, u_F/2, 30* u_phi, stepSize);
+            x = x + stepSize*runge4(x, u_F, u_phi, stepSize);
             std::cout<<"State: " << x << "\n";
             return x;
         }
