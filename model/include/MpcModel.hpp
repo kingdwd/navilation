@@ -48,7 +48,7 @@ public:
         *Np = 0;
         *Ng = 0;
         *Nh = 0;
-        *NgT =0;
+        *NgT =2;
         *NhT =0;
     }
 
@@ -58,12 +58,12 @@ public:
     void ffct(typeRNum *out, ctypeRNum t
                     , ctypeRNum *x, ctypeRNum *u
                     , ctypeRNum *p) override {
-        typeRNum v = sqrt(out[3]*out[3] + out[4]*out[4]);
-        typeRNum sign_v = U::Math::sgn(v);
+        typeRNum sign_v = U::Math::sgn(x[3]);
+        typeRNum v = sign_v*sqrt(x[3]*x[3] + x[4]*x[4]);
 
         out[0] = v*cos(x[2]);
         out[1] = v*sin(x[2]);
-        out[2] = x[3]/(epi::System::a + epi::System::b)*tan(u[1]);
+        out[2] = v/(epi::System::a + epi::System::b)*tan(u[1]);
         out[3] = x[4]*out[2] + (u[0] * epi::System::P - sign_v*
                 (epi::System::CA*v*v + epi::System::Fr))/epi::System::m;
         out[4] = 0;
@@ -72,21 +72,27 @@ public:
     void dfdx_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *adj, ctypeRNum *u, ctypeRNum *p) override {
         double l = (epi::System::a + epi::System::b); // car length
         double k = 2*epi::System::CA/epi::System::m;
-        
+
+        typeRNum v = sqrt(x[3]*x[3] + x[4]*x[4]);
+        typeRNum sign_v = U::Math::sgn(x[3]);
+
+        typeRNum dv_x = v== 0.0 ? 1 : x[3]/v;
+        typeRNum dv_y = v== 0.0 ? 1 : x[4]/v;
         out[0] = 0;
         out[1] = 0;
-        out[2] = x[3]*(cos(x[2])*adj[1]-sin(x[2])*adj[0]);
-        out[3] = cos(x[2])*adj[0] + sin(x[2])*adj[1] + tan(u[1])/l*adj[2]
+        out[2] = sign_v*v*(cos(x[2])*adj[1]-sin(x[2])*adj[0]);
+        out[3] = dv_x*(cos(x[2])*adj[0] + sin(x[2])*adj[1] + tan(u[1])/l*adj[2])
                 - k*abs(x[3])*adj[3];
-        out[4] = -sin(x[2])*adj[0] + cos(x[2])*adj[1]
-                + (out[3]*tan(x[2])/l - k*abs(x[4]))*adj[3];
+        out[4] = dv_y*(cos(x[2])*adj[0] + sin(x[2])*adj[1] + tan(u[1])/l*adj[2]) - k*abs(x[4])*adj[3];
     }
     /** Jacobian df/du multiplied by vector vec, i.e. (df/du)^T*vec or vec^T*(df/du) **/
     void dfdu_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *adj, ctypeRNum *u, ctypeRNum *p) override {
         double l = (epi::System::a + epi::System::b); // car length
-        typeRNum v = sqrt(out[3]*out[3] + out[4]*out[4]);
+        typeRNum sign_v = U::Math::sgn(x[3]);
+        typeRNum v = sign_v*sqrt(x[3]*x[3] + x[4]*x[4]);
+
         out[0] = epi::System::P/epi::System::m*adj[3];
-        out[1] = 2*x[3]/l/*(l*cos(2*u[1]) + l)*/*adj[2];
+        out[1] = 2*x[3]/(l*cos(2*u[1]) + l)*adj[2];
     }
     /** Jacobian df/dp multiplied by vector vec, i.e. (df/dp)^T*vec or vec^T*(df/dp) **/
     void dfdp_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *adj, ctypeRNum *u, ctypeRNum *p) override {}
@@ -164,9 +170,15 @@ public:
 
 
     /** Terminal equality constraints gT(T,x,p) = 0 */
-    virtual void gTfct(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *p) {}
+    virtual void gTfct(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *p) {
+        out[0] = x[3];
+        out[1] = x[4];
+    }
     /** Jacobian dgT/dx multiplied by vector vec, i.e. (dgT/dx)^T*vec or vec^T*(dgT/dx) **/
-    virtual void dgTdx_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *p, ctypeRNum *vec) {}
+    virtual void dgTdx_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *p, ctypeRNum *vec) {
+        out[0] = vec[3];
+        out[1] = vec[4];
+    }
     /** Jacobian dgT/dp multiplied by vector vec, i.e. (dgT/dp)^T*vec or vec^T*(dgT/dp) **/
     virtual void dgTdp_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *p, ctypeRNum *vec) {}
     /** Jacobian dgT/dT multiplied by vector vec, i.e. (dgT/dT)^T*vec or vec^T*(dgT/dT) **/
