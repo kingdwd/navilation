@@ -144,7 +144,7 @@ int main(int argc, char** args)
 	/* Initial values and setpoints of the states, inputs, parameters, penalties and Lagrangian mmultipliers, setpoints for the states and inputs */
 	ctypeRNum x0[NX] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
 
-	epi::State xdes = { 500, -200.0, 2.0, 0.0, 0.0 };
+	epi::State xdes = { 5, -300.0, -2.0, 0.0, 0.0 };
 
 	/* Initial values, setpoints and limits of the inputs */
 	ctypeRNum u0[NU] = { 0.0, 0.0 };
@@ -161,8 +161,8 @@ int main(int argc, char** args)
     /********* Option param definition *******/
     ctypeRNum ConstraintsAbsTol[1] = {1e-1};
 
-    ctypeInt MaxGradIter = 40;
-    ctypeInt MaxMultIter = 4;
+    ctypeInt MaxGradIter = 90;
+    ctypeInt MaxMultIter = 3;
     ctypeInt Nhor = 30;
 
 
