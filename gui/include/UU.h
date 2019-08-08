@@ -6,7 +6,7 @@
 #define EPIPHANY_UU_H
 
 
-#include <opencv2/core/mat.hpp>
+#include <opencv4/opencv2/core/mat.hpp>
 
 namespace UU {
     using Pixel = cv::Point3_<uint8_t>;

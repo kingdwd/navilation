@@ -15,7 +15,7 @@ namespace epi{
     };
 
     State DynamicModel::convert (const double longitudinal, const double lateral, const State state) {
-        return sys.next(longitudinal, lateral);
+        return sys.next(longitudinal, _limitBlock.apply(lateral));
     }
 
 }

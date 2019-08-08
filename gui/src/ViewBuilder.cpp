@@ -4,11 +4,12 @@
 
 #include <iostream>
 #include <string>
-#include <opencv2/core.hpp>
+#include <opencv4/opencv2/core.hpp>
 
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
+#include <opencv4/opencv2/imgcodecs.hpp>
+#include <opencv4/opencv2/imgproc.hpp>
+#include <opencv4/opencv2/highgui.hpp>
+#include <Spline.hpp>
 #include "UU.h"
 #include "data.h"
 #include "U.h"
@@ -20,6 +21,7 @@ class ViewBuilder{
     shared_ptr<epi::Vehicle> car;
     Mutex _mutex;
     Mat car_img, map, dst, alpha, car_r, alpha_r;
+    epi::spline::Points spline;
 
     void init(){
         std::string imageName("../../gui/data/car.png");
@@ -72,8 +74,19 @@ public:
         car->pose.onUpdate(this, &ViewBuilder::onPoseUpdate);
     }
 
+    void setPath(const epi::spline::Points& spline){
+        this->spline = spline;
+        for(auto& point : spline){
+            std::cout<< "point to vis as path: " << point << "\n";
+            UU::overlayImage(map, Mat(2, 2, car_r.type(), Scalar(0,255,0)),
+                    255*Mat::ones(2,2, alpha_r.type()), map, Point(point.val[0], -point[1]));
+        }
+    }
+
     void show(){
-        namedWindow( "Display window", WINDOW_FREERATIO ); // Create a window for display.
+        auto mainWindowTitle = "Display window";
+        namedWindow( mainWindowTitle, WINDOW_FREERATIO ); // Create a window for display.
+        //createButton("Automatic", [](int state, void* l){});
         drawCarAt(car->pose.get());
     }
 };

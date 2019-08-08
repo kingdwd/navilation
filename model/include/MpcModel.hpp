@@ -14,22 +14,20 @@
 
 class MpcModel : public grampc::ProblemDescription {
 
-
-
     /**
      * final state cost parameters
      */
-    typeRNum* FSC;
+    const typeRNum* FSC;
 
     /**
      * state cost parameters
      */
-    typeRNum* SC;
+    const typeRNum* SC;
 
     /**
      * input cost parameters
      */
-    typeRNum* IC;
+    const typeRNum* IC;
 
 public:
     static constexpr typeInt X_DIM = 5;

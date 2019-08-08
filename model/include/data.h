@@ -7,9 +7,11 @@
 
 #include "U.h"
 #include "ControlBlock.hpp"
+#include "Deadband.hpp"
+#include "LimitBlock.hpp"
 #include <memory>
 #include <ostream>
-#include <opencv2/core.hpp>
+#include <opencv4/opencv2/core.hpp>
 #include <UMath.h>
 
 namespace epi {
@@ -93,7 +95,7 @@ namespace epi {
         static constexpr double Cx = 1.5E5;  /* Longitudinal tire stiffness.     */
         static constexpr double Cy = 4E5;    /* Lateral tire stiffness.          */
         static constexpr double CA = 1.5;   /* Air resistance coefficient.      */
-        static constexpr double P = 3E5;     /* Power */
+        static constexpr double P = 4E5;     /* Power */
         static constexpr double g = 9.81;
         static constexpr double Cr = 1.0;   /* Rolling resistance coefficient  */
         static constexpr double Fr = m*g*Cr;
@@ -177,6 +179,7 @@ namespace epi {
 
     class DynamicModel : public Controller {
     private:
+        LimitBlock<double> _limitBlock{0.5};
         System sys;
     public:
         DynamicModel(System sys) :
