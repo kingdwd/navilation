@@ -95,7 +95,7 @@ namespace epi {
         static constexpr double Cx = 1.5E5;  /* Longitudinal tire stiffness.     */
         static constexpr double Cy = 4E5;    /* Lateral tire stiffness.          */
         static constexpr double CA = 1.5;   /* Air resistance coefficient.      */
-        static constexpr double P = 4E5;     /* Power */
+        static constexpr double P = 2E5;     /* Power */
         static constexpr double g = 9.81;
         static constexpr double Cr = 1.0;   /* Rolling resistance coefficient  */
         static constexpr double Fr = m*g*Cr;
@@ -127,8 +127,6 @@ namespace epi {
                                                  -2*b*Cy*(b*d_phi -v_y)/abs(v_x) : 0;
             double sign_vy = sgn(v_y*d_phi);
             double sign_y = sgn(v_y);
-            std::cout<<"v_x * dPhi: "<< v_x*d_phi<<"\n";
-            std::cout<<"deadband: "<< dd_phi<<"\n";
             State dx{v*cos(x[2]) // dx
                     , v*sin(x[2]) // dy
                     , d_phi//sign_v*sqrt(abs(v))/(b)*sin(beta) //d_phi

@@ -1,9 +1,10 @@
 project(gui)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_AUTOMOC ON)
 find_package( OpenCV REQUIRED )
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package (Threads)
-add_executable(gui src/main.cpp src/UU.cpp src/ViewBuilder.cpp include/view.hpp )
+add_executable(gui src/main.cpp src/UU.cpp src/ViewBuilder.cpp include/view.hpp include/viewModel.hpp src/viewModel.cpp src/view.cpp)
 include_directories(${CMAKE_SOURCE_DIR}/Util/include) # include files from ProjectB
 include_directories(${CMAKE_SOURCE_DIR}/model/include) # include files from ProjectB
 target_include_directories(gui PRIVATE "include")
