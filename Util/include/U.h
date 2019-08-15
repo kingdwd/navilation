@@ -128,9 +128,11 @@ namespace U {
     public:
         SubscriptionHandle(Sub&& lambda) : removeSub{std::forward<Sub>(lambda)} {}
         void unsubscribe(){
+            std::cout << "unsub called \n";
             if(doOnce){
                 doOnce = false;
                 removeSub();
+                std::cout << "after unsub called \n";
             }
         }
     };
@@ -140,16 +142,19 @@ namespace U {
     class Var{
         V _v;
         std::list<std::function<void(V)>> _listeners;
+        std::function<void()> _notifyAll;
     public:
         Var(V initialValue);
         V get() const noexcept;
 
         template <class Func, class Callee>
-        SubscriptionHandle onUpdate(Callee&& callee, Func&& callback);
+        std::unique_ptr<SubscriptionHandle> onUpdate(Callee&& callee, Func&& callback);
 
-        SubscriptionHandle onUpdate(const std::function<void(V)>& callback);
+        std::unique_ptr<SubscriptionHandle> onUpdate(const std::function<void(V)>& callback);
 
-        void set(const V newValue) noexcept;
+        long listenerSize();
+
+        void set(const V& newValue) noexcept;
 
     };
 

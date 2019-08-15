@@ -5,9 +5,9 @@
 #include <opencv4/opencv2/core/mat.hpp>
 #include "Spline.hpp"
 
-using Punkt = cv::Vec2d;
+using Punkt = cv::Point;
 
-inline double tj(double ti, Punkt p_i, Punkt p_j){
+inline double tj(double ti, const Punkt& p_i, const Punkt& p_j){
     return ti + cv::norm(p_j - p_i);
 }
 

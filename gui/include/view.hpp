@@ -17,19 +17,16 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include "viewModel.hpp"
+#include "OperationMode.hpp"
 
 namespace epi{
 
-    class View : public QMainWindow {
-        Q_OBJECT
-
-    public slots:
-        void defRoute();
+    class View {
 
     public:
-        View(std::unique_ptr<ViewModel> model, QWidget* parent = 0);
+        View(std::shared_ptr<ViewModel> model);
     private:
-        std::unique_ptr<ViewModel> _model;
+        std::shared_ptr<ViewModel> _modelPtr;
     };
 
 }

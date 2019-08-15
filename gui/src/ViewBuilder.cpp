@@ -2,6 +2,7 @@
 // Created by sigi on 11.06.19.
 //
 
+#include "viewControl.hpp"
 #include <iostream>
 #include <string>
 #include <opencv4/opencv2/core.hpp>
@@ -9,38 +10,49 @@
 #include <opencv4/opencv2/imgcodecs.hpp>
 #include <opencv4/opencv2/imgproc.hpp>
 #include <opencv4/opencv2/highgui.hpp>
-#include <Spline.hpp>
+#include <view.hpp>
 #include "UU.h"
 #include "data.h"
 #include "U.h"
 
 using namespace std;
+using namespace epi;
 using namespace cv;
 
-class ViewBuilder{
-    shared_ptr<epi::Vehicle> car;
+struct epi::ViewBuilder::Impl {
     Mutex _mutex;
-    Mat car_img, map, dst, alpha, car_r, alpha_r;
-    epi::spline::Points spline;
+    Mat car_img, workMap, map, dst, alpha, car_r, alpha_r;
+    shared_ptr<MouseClickHandler> _mouseClickHandler;
+    shared_ptr<ViewModel> _viewModel;
 
-    void init(){
+    View view{_viewModel};
+
+    Impl(shared_ptr<MouseClickHandler> mouseHandler
+            , const std::shared_ptr<epi::Vehicle> car
+            , ViewBuilder* vb)
+    : _mouseClickHandler{mouseHandler}
+    , _viewModel{make_shared<ViewModel>(_mouseClickHandler, car, vb)}
+    {}
+
+    void init() {
         std::string imageName("../../gui/data/car.png");
         std::string mapName("../../gui/data/map.png");
 
-        map = imread( mapName ); // Read the file
-        car_img = imread( imageName ); // Read the file
+        map = imread(mapName); // Read the file
+        car_img = imread(imageName); // Read the file
         alpha = UU::imreadAlpha(imageName);
 
-        if( car_img.empty() )                      // Check for invalid input
+        if (car_img.empty())                      // Check for invalid input
         {
-            cout <<  "Could not open or find the image" << std::endl ;
+            cout << "Could not open or find the image\n";
             return;
         }
 
         int pos = 0;
-        resize(map, map, Size() , 2, 2, INTER_LINEAR);
-        resize(alpha, alpha, Size() , 0.05, 0.05, INTER_AREA);
-        resize(car_img, car_img, Size() , 0.05, 0.05, INTER_AREA);
+        resize(map, map, Size(), 2, 2, INTER_LINEAR);
+        resize(alpha, alpha, Size(), 0.05, 0.05, INTER_AREA);
+        resize(car_img, car_img, Size(), 0.05, 0.05, INTER_AREA);
+        workMap = map;
 
         UU::pad2square(car_img);
         UU::pad2square(alpha);
@@ -50,7 +62,7 @@ class ViewBuilder{
         UU::rotateSimple(alpha, alpha, 180);
     }
 
-    void drawCarAt(epi::Pose pose){
+    void drawCarAt(const Pose &pose) {
         double phi = U::Math::r2d(pose.phi);
         UU::rotateSimple(car_img, car_r, phi);
         UU::rotateSimple(alpha, alpha_r, phi);
@@ -59,34 +71,48 @@ class ViewBuilder{
          * sign reversal.
          * */
 
-        UU::overlayImage(map, car_r, alpha_r, dst, Point(pose.x,-pose.y));
-        imshow( "Display window", dst );                // Show our image inside it.
+        UU::overlayImage(workMap, car_r, alpha_r, dst, cv::Point(pose.x, -pose.y));
+        imshow(MAIN_WINDOW_TITLE, dst);
     }
 
-    void onPoseUpdate(epi::Pose pose){
+    void onPoseUpdate(const Pose &pose) {
         std::unique_lock<mutex>(_mutex);
-        cout<<"Pose changed to " << pose << "\n";
+        cout << "Pose changed to " << pose << "\n";
         drawCarAt(pose);
     }
-public:
-    ViewBuilder(shared_ptr<epi::Vehicle> car) : car{car} {
-        init();
-        car->pose.onUpdate(this, &ViewBuilder::onPoseUpdate);
-    }
-
-    void setPath(const epi::spline::Points& spline){
-        this->spline = spline;
-        for(auto& point : spline){
-            std::cout<< "point to vis as path: " << point << "\n";
-            UU::overlayImage(map, Mat(2, 2, car_r.type(), Scalar(0,255,0)),
-                    255*Mat::ones(2,2, alpha_r.type()), map, Point(point.val[0], -point[1]));
-        }
-    }
-
-    void show(){
-        auto mainWindowTitle = "Display window";
-        namedWindow( mainWindowTitle, WINDOW_FREERATIO ); // Create a window for display.
-        //createButton("Automatic", [](int state, void* l){});
-        drawCarAt(car->pose.get());
-    }
 };
+
+epi::ViewBuilder::ViewBuilder(const shared_ptr<Vehicle> car)
+: car{car}
+, pImpl{make_unique<Impl>(make_shared<MouseClickHandler>(), car, this)}
+{
+    pImpl->init();
+    car->pose.onUpdate(pImpl.get(), &Impl::onPoseUpdate);
+}
+
+const static Scalar RED(0,0,255);
+void epi::ViewBuilder::drawSpline(const spline::Points& spline){
+    resetSpline();
+    int pointThickNess = 2;
+    auto pointToDraw = Mat(pointThickNess, pointThickNess, pImpl->car_r.type(), RED);
+    auto opacity = 255*Mat::ones(pointThickNess, pointThickNess, pImpl->alpha_r.type());
+    for(auto& point : spline){
+        std::cout<< "point to vis as path: " << point << "\n";
+        UU::overlayImage(pImpl->dst, pointToDraw, opacity
+                , pImpl->dst, cv::Point(point.x, point.y));
+    }
+    imshow(MAIN_WINDOW_TITLE, pImpl->dst);
+}
+
+void epi::ViewBuilder::show(){
+    namedWindow( MAIN_WINDOW_TITLE, WINDOW_FREERATIO ); // Create a window for display.
+    setMouseCallback(MAIN_WINDOW_TITLE, &MouseClickHandler::onClick , pImpl->_mouseClickHandler.get());
+    pImpl->drawCarAt(car->pose.get());
+}
+
+void ViewBuilder::resetSpline() {
+    pImpl->workMap = pImpl->map;
+    pImpl->drawCarAt(car->pose.get());
+}
+
+epi::ViewBuilder::~ViewBuilder() = default;

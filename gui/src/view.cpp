@@ -4,14 +4,17 @@
 
 #include <view.hpp>
 
+using epi::View;
+
 auto newLine(){
     auto lineA = new QFrame;
     lineA->setFrameShape(QFrame::HLine);
     lineA->setFrameShadow(QFrame::Sunken);
     return lineA;
 }
-epi::View::View(std::unique_ptr<epi::ViewModel> model, QWidget *parent) :
-    QMainWindow(parent), _model{std::move(model)}
+
+View::View(std::shared_ptr<epi::ViewModel> model) :
+    _modelPtr{model}
 {
     QPushButton *quitButton = new QPushButton("&Quit");
     QObject::connect(quitButton, SIGNAL (clicked()), qApp, SLOT (quit()));
@@ -27,23 +30,25 @@ epi::View::View(std::unique_ptr<epi::ViewModel> model, QWidget *parent) :
     auto posSetGroup = new QHBoxLayout;
     auto posLabel = new QLabel("Pose");
     auto xPos = new QLineEdit("x pos");
-    auto yPos = new QLineEdit;
-    auto phiPos = new QLineEdit;
+    auto yPos = new QLineEdit("y pos");
+    auto thetaPos = new QLineEdit("theta");
     QPushButton *goPosButton = new QPushButton("GO");
 
     posSetGroup->addWidget(posLabel);
     posSetGroup->addWidget(xPos);
     posSetGroup->addWidget(yPos);
-    posSetGroup->addWidget(phiPos);
+    posSetGroup->addWidget(thetaPos);
     posSetGroup->addWidget(goPosButton);
     /* =============================================== */
 
     /* =============================================== */
     auto routeSetGroup = new QHBoxLayout;
     auto defRouteBtn = new QPushButton("Def Route");
-    QObject::connect(defRouteBtn, SIGNAL(clicked()), this, SLOT(defRoute()));
+    QObject::connect(defRouteBtn, SIGNAL(clicked()), _modelPtr.get(), SLOT(defRoute()));
     auto resetRouteBtn = new QPushButton("Reset");
+    QObject::connect(resetRouteBtn, SIGNAL(clicked()), _modelPtr.get(), SLOT(resetRoute()));
     auto goRouteBtn = new QPushButton("GO");
+    QObject::connect(goRouteBtn, SIGNAL(clicked()), _modelPtr.get(), SLOT(startRoute()));
 
     routeSetGroup->addWidget(defRouteBtn);
     routeSetGroup->addWidget(resetRouteBtn);
@@ -66,6 +71,5 @@ epi::View::View(std::unique_ptr<epi::ViewModel> model, QWidget *parent) :
     window->show();
 }
 
-void epi::View::defRoute() {
-    _model->defRoute();
-}
+
+

@@ -12,7 +12,7 @@ void show(int i) {
 }
 struct Stud{
     U::Var<std::string> name;
-    U::SubscriptionHandle handle = name.onUpdate(&Stud::print, this);
+    std::unique_ptr<U::SubscriptionHandle> handle = name.onUpdate(this, &Stud::print);
     Stud() : name("peter"){}
 
     void hello(){}
@@ -20,10 +20,10 @@ struct Stud{
         std::cout<< "\n";
         std::cout<<"value update: " << i << "\n";
     }
-    void print(std::string s){
+    void print(const std::string s){
         std::cout<< "\n";
         std::cout<<"string update: " << s << "\n";
-        handle.unsubscribe();
+        //handle->unsubscribe();
     }
 };
 
@@ -72,13 +72,22 @@ TEST(var_test, add_listener){
     U::Var<int> v(42);
     Stud s;
     auto c = [](int v){std::cout << "alter changed : " << v << "\n";};
-    auto subHandle = v.onUpdate([](int v){std::cout << "alter changed : " << v << "\n";});
+    std::unique_ptr<U::SubscriptionHandle> subHandle;
+    subHandle = v.onUpdate([](int v){std::cout << "alter changed : " << v << "\n";});
     v.set(1337);
-    //subHandle.unsubscribe();
+    EXPECT_EQ(1, v.listenerSize());
+    subHandle->unsubscribe();
+    EXPECT_EQ(0, v.listenerSize());
+    subHandle = v.onUpdate([](int v){std::cout << "alter changed : " << v << "\n";});
+    EXPECT_EQ(1, v.listenerSize());
+    subHandle->unsubscribe();
+    EXPECT_EQ(0, v.listenerSize());
+
     v.set(42);
     s.name.set("hans");
+    s.handle->unsubscribe();
     s.name.set("maulwurf");
-
+    EXPECT_EQ(0, s.name.listenerSize());
 }
 
 TEST(var_test, set_get_test){

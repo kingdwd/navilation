@@ -9,38 +9,49 @@
 //}
 
 template <class V>
-U::Var<V>::Var(const V initialValue) :_v(initialValue) {}
+U::Var<V>::Var(const V initialValue) : _v(initialValue) {
+    _notifyAll = [this] {
+        for (auto listener = _listeners.begin(); listener != _listeners.end(); listener++) {
+            (*listener)(_v);
+        }
+    };
+}
 
 template <class V>
 V U::Var<V>::get() const noexcept { return _v; }
 
 template <class V>
-void U::Var<V>::set(const V newValue) noexcept {
+void U::Var<V>::set(const V& newValue) noexcept {
     if(_v == newValue) return;
     _v = newValue;
-    auto f = [this]{
-        for(auto listener = _listeners.begin(); listener != _listeners.end(); listener++){
-            (*listener)(_v);
-        }
-    };
-    std::async(std::launch::async, f);
+    if(!_listeners.empty()){
+        std::async(std::launch::async, _notifyAll);
+    }
 }
 
 
 template<class V>
 template<class Func, class Callee>
-U::SubscriptionHandle U::Var<V>::onUpdate(Callee &&callee, Func&& callback) {
+std::unique_ptr<U::SubscriptionHandle> U::Var<V>::onUpdate(Callee &&callee, Func&& callback) {
     using namespace std::placeholders;
-    std::function<void(V)> cb = std::bind(std::forward<Func>(callback)
+    const std::function<void(V)> cb = std::bind(std::forward<Func>(callback)
             ,std::forward<Callee>(callee)
             , std::forward<decltype(_1)>(_1));
-    _listeners.push_front(cb);
-    return SubscriptionHandle([this, it = std::move(_listeners.cbegin())](){ _listeners.erase(it); });
+    return onUpdate(cb);
 }
 
 template<class V>
-U::SubscriptionHandle U::Var<V>::onUpdate(const std::function<void(V)> &callback) {
+std::unique_ptr<U::SubscriptionHandle> U::Var<V>::onUpdate(const std::function<void(V)> &callback) {
     _listeners.push_front(callback);
-    return SubscriptionHandle([this, it = std::move(_listeners.cbegin())](){ _listeners.erase(it); });
+    return std::make_unique<SubscriptionHandle>([this, it = std::move(_listeners.cbegin())](){
+        std::cout<<"before unsub: " << _listeners.size() << "\n";
+        _listeners.erase(it);
+        std::cout<<"after unsub: " << _listeners.size() << "\n";
+    });
+}
+
+template<class V>
+long U::Var<V>::listenerSize() {
+    return _listeners.size();
 }
 

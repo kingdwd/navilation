@@ -6,11 +6,12 @@
 #define EPIPHANY_CATMULLROMSPLINE_HPP
 
 #include <opencv4/opencv2/core/matx.hpp>
+#include <opencv4/opencv2/core.hpp>
 #include <vector>
 
 namespace epi {
     namespace spline {
-        using Points = std::vector<cv::Vec2d>;
+        using Points = std::vector<cv::Point>;
 
         enum class Solver{
             CATMULL_ROM

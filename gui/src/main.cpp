@@ -22,8 +22,8 @@
 
 #include "U.h"
 
-#include "ViewBuilder.cpp"
-#include "viewModel.hpp"
+#include "viewControl.hpp"
+#include "OperationMode.hpp"
 
 
 using namespace std;
@@ -37,10 +37,8 @@ auto stepSize = 0.01s;
 auto tol_xy = 5;
 auto tol_phi = 0.1;
 auto car = std::make_shared<Vehicle>(std::make_unique<DynamicModel>(System(State{0,0,0,0,0}, stepSize.count())));
-enum class Mode{
-    AUTO, MANUAL
-};
-auto mode = Mode::AUTO;
+
+auto mode = OperationMode::MANUAL;
 enum Key{
     none = -1,
     j = 106,
@@ -110,7 +108,7 @@ int waitUntilEscapeInManual(){
     int key = waitKey(5);
     switch (key) {
         case Key::none:
-            car->drive(0, 0);
+            //car->drive(0, 0);
             break;
         case Key::i:
             car->drive(1, 0);
@@ -164,16 +162,16 @@ Trajectory createTraj(const spline::Points& spline, const double vMax = 150){
     Trajectory traj;
     constexpr auto minX = 1e-6;
     auto splineSize = spline.size();
-    auto xLast = spline[splineSize-1][0];
-    auto yLast = spline[splineSize-1][1];
+    auto xLast = spline[splineSize-1].x;
+    auto yLast = spline[splineSize-1].y;
     auto v = vMax;
     /* last 10% */
     auto last10 = splineSize*0.85;
     for(int i=0; i<splineSize-1; i++){
-        auto x = spline[i][0];
-        auto y = spline[i][1];
-        auto dx = spline[i+1][0]-x;
-        auto dy = spline[i+1][1]-y;
+        auto x = spline[i].x;
+        auto y = spline[i].y;
+        auto dx = spline[i+1].x-x;
+        auto dy = spline[i+1].y-y;
         double alpha;
         if(dx > minX){
             alpha = atan(dy/dx);
@@ -192,8 +190,8 @@ Trajectory createTraj(const spline::Points& spline, const double vMax = 150){
             }
         }
         traj.push_back(
-            {spline[i][0]
-            , spline[i][1]
+            {(double) spline[i].x
+            ,(double) spline[i].y
             , alpha
             , v
             , 0
@@ -201,8 +199,8 @@ Trajectory createTraj(const spline::Points& spline, const double vMax = 150){
     }
     /*last element*/
     traj.push_back({
-        spline[splineSize-1][0],
-        spline[splineSize-1][1],
+        (double)spline[splineSize-1].x,
+        (double)spline[splineSize-1].y,
         traj[traj.size()-1][2],
         0,
         0
@@ -291,7 +289,7 @@ int doit(const spline::Points& path){
 
     view.show();
     //createTrackbar("hi", "Display window", &pos, 100, show);
-    if(mode == Mode::AUTO) {
+    if(mode == OperationMode::AUTOMATIC) {
         for(int i=0; i<traj.size(); i++){
             while (waitUntilEscape(mpc, traj[i]) && i !=traj.size()-1) {} // Wait for a keystroke in the window
         }
@@ -305,7 +303,6 @@ int main(int arg0, char** args)
 {
 
     QApplication app(arg0, args);
-    View view(std::make_unique<ViewModel>());
 
     spline::Points points;
     points.push_back({0,0});
@@ -319,8 +316,8 @@ int main(int arg0, char** args)
     spline::Points spline = spline::interpol(points);
 
 
-    app.exec();
-    return doit(spline);
+    doit(spline);
+    return app.exec();
 
 
 }
