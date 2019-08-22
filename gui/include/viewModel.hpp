@@ -11,15 +11,18 @@
 
 #include "mouseClickHandler.hpp"
 #include "viewControl.hpp"
+#include "System.hpp"
 
 namespace epi{
     class ViewModel : public QObject{
     public:
         ViewModel(std::shared_ptr<MouseClickHandler> mouseHandler
-                , std::shared_ptr<epi::Vehicle> car
+                , std::shared_ptr<epi::System> sys
                 , ViewBuilder* vb);
         ~ViewModel();
     public slots:
+        void switchOperationMode();
+
         void defRoute();
         void resetRoute();
         void startRoute();

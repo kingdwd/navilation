@@ -2,18 +2,16 @@
 // Created by sigi on 11.06.19.
 //
 
+#include <opencv4/opencv2/imgproc.hpp>
 #include "viewControl.hpp"
 #include <iostream>
 #include <string>
 #include <opencv4/opencv2/core.hpp>
 
 #include <opencv4/opencv2/imgcodecs.hpp>
-#include <opencv4/opencv2/imgproc.hpp>
 #include <opencv4/opencv2/highgui.hpp>
 #include <view.hpp>
 #include "UU.h"
-#include "data.h"
-#include "U.h"
 
 using namespace std;
 using namespace epi;
@@ -28,10 +26,10 @@ struct epi::ViewBuilder::Impl {
     View view{_viewModel};
 
     Impl(shared_ptr<MouseClickHandler> mouseHandler
-            , const std::shared_ptr<epi::Vehicle> car
+            , const std::shared_ptr<epi::System> sys
             , ViewBuilder* vb)
     : _mouseClickHandler{mouseHandler}
-    , _viewModel{make_shared<ViewModel>(_mouseClickHandler, car, vb)}
+    , _viewModel{make_shared<ViewModel>(_mouseClickHandler, sys, vb)}
     {}
 
     void init() {
@@ -49,6 +47,7 @@ struct epi::ViewBuilder::Impl {
         }
 
         int pos = 0;
+        constexpr int INTER_LINEAR = 1;
         resize(map, map, Size(), 2, 2, INTER_LINEAR);
         resize(alpha, alpha, Size(), 0.05, 0.05, INTER_AREA);
         resize(car_img, car_img, Size(), 0.05, 0.05, INTER_AREA);
@@ -82,9 +81,9 @@ struct epi::ViewBuilder::Impl {
     }
 };
 
-epi::ViewBuilder::ViewBuilder(const shared_ptr<Vehicle> car)
-: car{car}
-, pImpl{make_unique<Impl>(make_shared<MouseClickHandler>(), car, this)}
+epi::ViewBuilder::ViewBuilder(const shared_ptr<System> sys)
+: car{sys->vehicle}
+, pImpl{make_unique<Impl>(make_shared<MouseClickHandler>(), sys, this)}
 {
     pImpl->init();
     car->pose.onUpdate(pImpl.get(), &Impl::onPoseUpdate);
@@ -92,13 +91,13 @@ epi::ViewBuilder::ViewBuilder(const shared_ptr<Vehicle> car)
 
 const static Scalar RED(0,0,255);
 void epi::ViewBuilder::drawSpline(const spline::Points& spline){
-    resetSpline();
+    pImpl->workMap = pImpl->dst;
     int pointThickNess = 2;
     auto pointToDraw = Mat(pointThickNess, pointThickNess, pImpl->car_r.type(), RED);
     auto opacity = 255*Mat::ones(pointThickNess, pointThickNess, pImpl->alpha_r.type());
     for(auto& point : spline){
         std::cout<< "point to vis as path: " << point << "\n";
-        UU::overlayImage(pImpl->dst, pointToDraw, opacity
+        UU::overlayImage(pImpl->workMap, pointToDraw, opacity
                 , pImpl->dst, cv::Point(point.x, point.y));
     }
     imshow(MAIN_WINDOW_TITLE, pImpl->dst);

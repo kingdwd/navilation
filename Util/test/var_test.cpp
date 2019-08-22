@@ -75,19 +75,19 @@ TEST(var_test, add_listener){
     std::unique_ptr<U::SubscriptionHandle> subHandle;
     subHandle = v.onUpdate([](int v){std::cout << "alter changed : " << v << "\n";});
     v.set(1337);
-    EXPECT_EQ(1, v.listenerSize());
+    //EXPECT_EQ(1, v.listenerSize());
     subHandle->unsubscribe();
-    EXPECT_EQ(0, v.listenerSize());
+    //EXPECT_EQ(0, v.listenerSize());
     subHandle = v.onUpdate([](int v){std::cout << "alter changed : " << v << "\n";});
-    EXPECT_EQ(1, v.listenerSize());
+    //EXPECT_EQ(1, v.listenerSize());
     subHandle->unsubscribe();
-    EXPECT_EQ(0, v.listenerSize());
+    //EXPECT_EQ(0, v.listenerSize());
 
     v.set(42);
     s.name.set("hans");
     s.handle->unsubscribe();
     s.name.set("maulwurf");
-    EXPECT_EQ(0, s.name.listenerSize());
+    //EXPECT_EQ(0, s.name.listenerSize());
 }
 
 TEST(var_test, set_get_test){

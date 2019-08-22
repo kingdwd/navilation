@@ -13,9 +13,6 @@ namespace epi{
         T operator>>(const T& a){
             return apply(a);
         }
-        T kuku(T& a){
-            return apply(a);
-        }
     };
 }
 

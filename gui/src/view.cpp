@@ -4,6 +4,15 @@
 
 #include <view.hpp>
 
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMainWindow>
 using epi::View;
 
 auto newLine(){
@@ -24,6 +33,8 @@ View::View(std::shared_ptr<epi::ViewModel> model) :
     window->setWindowTitle("Control Bar");
     /* =============================================== */
     auto manualMode = new QRadioButton("Manual");
+    manualMode->setChecked(true);
+    QObject::connect(manualMode, SIGNAL(clicked()), _modelPtr.get(), SLOT(switchOperationMode()));
     /* =============================================== */
 
     /* =============================================== */

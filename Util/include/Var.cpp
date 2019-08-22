@@ -50,8 +50,4 @@ std::unique_ptr<U::SubscriptionHandle> U::Var<V>::onUpdate(const std::function<v
     });
 }
 
-template<class V>
-long U::Var<V>::listenerSize() {
-    return _listeners.size();
-}
 

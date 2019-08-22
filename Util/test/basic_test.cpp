@@ -26,3 +26,8 @@ TEST(basic_check, erase_deletes_all_elements_based_on_predicate) {
     EXPECT_EQ(i.size(), 3);
 }
 
+TEST(basic_check, for_each_iterates){
+    std::vector<int> i{1,2,3,4,5,6};
+    U::foreach(i, []{std})
+
+}

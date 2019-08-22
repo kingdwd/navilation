@@ -7,17 +7,17 @@
 
 #include "Spline.hpp"
 #include "mouseClickHandler.hpp"
+#include "System.hpp"
 
 using namespace std;
 
 namespace epi {
     class ViewBuilder {
 
-
     public:
         inline static const string MAIN_WINDOW_TITLE = "hello";
 
-        ViewBuilder(const shared_ptr<Vehicle> car);
+        ViewBuilder(const shared_ptr<System> car);
         ~ViewBuilder();
 
         void drawSpline(const spline::Points &spline);

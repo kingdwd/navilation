@@ -121,6 +121,11 @@ namespace U {
         v.erase( std::remove_if(v.begin(), v.end(), predicate), v.end() );
     }
 
+    template <class Collection, typename Lambda>
+    void foreach(Collection& c, Lambda&& l){
+        std::for_each(c.begin(), c.end(), l);
+    }
+
     class SubscriptionHandle{
         using Sub = std::function<void()>;
         Sub removeSub;
@@ -151,8 +156,6 @@ namespace U {
         std::unique_ptr<SubscriptionHandle> onUpdate(Callee&& callee, Func&& callback);
 
         std::unique_ptr<SubscriptionHandle> onUpdate(const std::function<void(V)>& callback);
-
-        long listenerSize();
 
         void set(const V& newValue) noexcept;
 
