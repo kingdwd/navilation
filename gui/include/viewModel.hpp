@@ -5,7 +5,7 @@
 #ifndef EPIPHANY_VIEWMODEL_HPP
 #define EPIPHANY_VIEWMODEL_HPP
 
-#include <QtCore/QArgument>
+#include "U.h"
 #include <QObject>
 #include <memory>
 

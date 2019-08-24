@@ -7,6 +7,7 @@
 #include <mutex>
 #include <Spline.hpp>
 
+
 struct epi::ViewModel::Impl{
    std::unique_ptr<U::SubscriptionHandle> subHandle;
    spline::Points points;

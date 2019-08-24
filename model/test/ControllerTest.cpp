@@ -22,9 +22,11 @@ TEST(random_test, tester){
 	typeInt MaxSimIter = (int)(Tsim / con::STEP_SIZE.count());
     typeInt iMPC;
     typeRNum CpuTimeVec[MaxSimIter];
-    State xdes{10,0,0,100,0};
+	epi::State xdes{ 115, -300.0, -2.0, 0.0, 0.0 };
     mpc->setparam_real_vector("xdes", xdes.val);
 	printf("MPC running ...\n");
+	State state = car.getState();
+	mpc->setparam_real_vector("x0", state.val);
 	for (iMPC = 0; iMPC <= MaxSimIter; iMPC++) {
 		/* run grampc */
 		auto tic = clock();
@@ -49,13 +51,11 @@ TEST(random_test, tester){
 		//}
 		uF = mpc->getSolution()->xnext[0];
 		uPhi = mpc->getSolution()->unext[1];
+        //std::cout<<"State of car: " << state << "\n";
+        State e{mpc->getSolution()->xnext};
+        std::cout<<"State of estim: " << e << "\n";
 		car.drive(uF, uPhi);
-		State state = car.getState();
-		std::cout<<"State of car: " << state << "\n";
 
-		State e{mpc->getSolution()->xnext};
-		std::cout<<"error of estim: " << e << "\n";
-		mpc->setparam_real_vector("x0", state.val);
 
 	}
 

@@ -12,6 +12,7 @@
 #include <opencv4/opencv2/highgui.hpp>
 #include <view.hpp>
 #include "UU.h"
+#include "keyHandler.hpp"
 
 using namespace std;
 using namespace epi;
@@ -22,6 +23,8 @@ struct epi::ViewBuilder::Impl {
     Mat car_img, workMap, map, dst, alpha, car_r, alpha_r;
     shared_ptr<MouseClickHandler> _mouseClickHandler;
     shared_ptr<ViewModel> _viewModel;
+    std::shared_ptr<System> _sys;
+    volatile State _carPos;
 
     View view{_viewModel};
 
@@ -30,6 +33,8 @@ struct epi::ViewBuilder::Impl {
             , ViewBuilder* vb)
     : _mouseClickHandler{mouseHandler}
     , _viewModel{make_shared<ViewModel>(_mouseClickHandler, sys, vb)}
+    , _sys{sys}
+    , _carPos{sys->vehicle->getState()}
     {}
 
     void init() {
@@ -62,6 +67,7 @@ struct epi::ViewBuilder::Impl {
     }
 
     void drawCarAt(const Pose &pose) {
+        std::unique_lock<mutex>(_mutex);
         double phi = U::Math::r2d(pose.phi);
         UU::rotateSimple(car_img, car_r, phi);
         UU::rotateSimple(alpha, alpha_r, phi);
@@ -75,7 +81,6 @@ struct epi::ViewBuilder::Impl {
     }
 
     void onPoseUpdate(const Pose &pose) {
-        std::unique_lock<mutex>(_mutex);
         cout << "Pose changed to " << pose << "\n";
         drawCarAt(pose);
     }
@@ -86,7 +91,7 @@ epi::ViewBuilder::ViewBuilder(const shared_ptr<System> sys)
 , pImpl{make_unique<Impl>(make_shared<MouseClickHandler>(), sys, this)}
 {
     pImpl->init();
-    car->pose.onUpdate(pImpl.get(), &Impl::onPoseUpdate);
+    //car->pose.onUpdate(pImpl.get(), &Impl::onPoseUpdate);
 }
 
 const static Scalar RED(0,0,255);
@@ -104,9 +109,14 @@ void epi::ViewBuilder::drawSpline(const spline::Points& spline){
 }
 
 void epi::ViewBuilder::show(){
-    namedWindow( MAIN_WINDOW_TITLE, WINDOW_FREERATIO ); // Create a window for display.
+    namedWindow( ViewBuilder::MAIN_WINDOW_TITLE, WINDOW_FREERATIO ); // Create a window for display.
     setMouseCallback(MAIN_WINDOW_TITLE, &MouseClickHandler::onClick , pImpl->_mouseClickHandler.get());
-    pImpl->drawCarAt(car->pose.get());
+    int key = 0;
+    while(key != Key::esc){
+        pImpl->drawCarAt(car->pose.get());
+        key = waitKey(9);
+        epi::handleKey(static_cast<Key>(key), pImpl->_sys.get());
+    }
 }
 
 void ViewBuilder::resetSpline() {

@@ -17,15 +17,20 @@ struct epi::System::SystemImpl{
     volatile double uPhi = 0.0;
     const double tol_xy = 5;
     const double tol_phi = 0.1;
+    volatile bool _run = true;
     std::mutex _mutex;
-    std::thread simulation;
+    std::future<void> simulation;
     Trajectory traj;
     System* sys;
     SystemImpl(System* sys) : sys{sys} {
-        simulation = std::thread(&SystemImpl::run, this);
+        simulation = std::async(std::launch::async, &SystemImpl::run, this);
+    }
+    ~SystemImpl(){
+        std::cout<< "System iMPL destroyed \n";
+        _run = false;
     }
     void run(){
-        while(true){
+        while(_run){
             Clock::time_point t1 = Clock::now();
             bool isInAutoMode = sys->modeProvider->state.get() == OperationMode::AUTOMATIC;
             if( isInAutoMode && !traj.empty()){
@@ -49,6 +54,7 @@ struct epi::System::SystemImpl{
                     //xdes = state;
                 }
 
+                sys->_mpc->setparam_real_vector("x0", state.val);
                 sys->_mpc->setparam_real_vector("xdes", xdes.val);
                 std::cout<<"Demanded x value: "<< xdes <<"]\n";
                 std::cout<<"Deviation is : ["<< l2_xy <<","<< l2_phi <<"]\n";
@@ -60,7 +66,6 @@ struct epi::System::SystemImpl{
 
             }
             sys->vehicle->drive(uF, uPhi);
-            sys->_mpc->setparam_real_vector("x0", sys->vehicle->getState().val);
 
             auto duration = ( Clock::now() - t1 );
 

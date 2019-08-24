@@ -21,7 +21,7 @@ namespace epi{
         static constexpr double Cx = 1.5E5;  /* Longitudinal tire stiffness.     */
         static constexpr double Cy = 4E5;    /* Lateral tire stiffness.          */
         static constexpr double CA = 1.5;    /* Air resistance coefficient.      */
-        static constexpr double P = 2E5;     /* Power */
+        static constexpr double P = 3E5;     /* Power */
         static constexpr double Cr = 1.0;    /* Rolling resistance coefficient   */
         static constexpr double Fr = m * g * Cr; /* normal force of friction         */
     }
