@@ -14,9 +14,10 @@
 
 namespace epi {
     struct System{
+
         System(std::shared_ptr<Vehicle> vehicle
                 , std::shared_ptr<OperationModeProvider> operationModeProvider
-                , std::unique_ptr<grampc::Grampc> controller);
+                );
         ~System();
 
         void move(double uF, double uPhi);
@@ -31,7 +32,7 @@ namespace epi {
         /**
          * model predictive controller
          */
-        std::unique_ptr<grampc::Grampc> _mpc;
+        //std::unique_ptr<grampc::Grampc> _mpc;
 
         class SystemImpl;
         std::unique_ptr<SystemImpl> impl;

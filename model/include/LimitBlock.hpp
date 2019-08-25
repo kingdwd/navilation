@@ -6,6 +6,7 @@
 #define EPIPHANY_LIMITBLOCK_HPP
 
 #include "ControlBlock.hpp"
+#include <math.h>
 
 namespace epi {
     /**
@@ -36,6 +37,7 @@ namespace epi {
         LimitBlock(T limit) : _limit{limit} {}
 
         T apply(const T value) override {
+            if(std::isnan(value)) return 0;
             if (value > _limit ) return _limit;
             if(-value > _limit) return -_limit;
             return value;

@@ -8,6 +8,7 @@
 #include <queue>
 #include <mutex>
 #include <thread>
+#include "MpcFactory.hpp"
 
 
 using Clock = std::chrono::high_resolution_clock ;
@@ -21,11 +22,22 @@ struct epi::System::SystemImpl{
     std::mutex _mutex;
     std::future<void> simulation;
     Trajectory traj;
+    constexpr static typeInt NX = MpcModel::X_DIM;
+    constexpr static typeInt NU = MpcModel::U_DIM;
+
+    typeRNum FINAL_STATE_COST[NX] = {10,10,100,1,1};
+    typeRNum STATE_COST[NX] = {10,10,100,1,1};
+    typeRNum INPUT_COST[NX] = {1,100};
+
+    grampc::ProblemDescription *model = new MpcModel(FINAL_STATE_COST, STATE_COST, INPUT_COST);
+    grampc::Grampc* _mpc= new grampc::Grampc(model);
     System* sys;
     SystemImpl(System* sys) : sys{sys} {
         simulation = std::async(std::launch::async, &SystemImpl::run, this);
+        createMpc(_mpc);
     }
     ~SystemImpl(){
+        delete _mpc;
         std::cout<< "System iMPL destroyed \n";
         _run = false;
     }
@@ -54,14 +66,14 @@ struct epi::System::SystemImpl{
                     //xdes = state;
                 }
 
-                sys->_mpc->setparam_real_vector("x0", state.val);
-                sys->_mpc->setparam_real_vector("xdes", xdes.val);
+                _mpc->setparam_real_vector("x0", state.val);
+                _mpc->setparam_real_vector("xdes", xdes.val);
                 std::cout<<"Demanded x value: "<< xdes <<"]\n";
                 std::cout<<"Deviation is : ["<< l2_xy <<","<< l2_phi <<"]\n";
-                sys->_mpc->run();
-                uF = sys->_mpc->getSolution()->unext[0];
-                uPhi = sys->_mpc->getSolution()->unext[1];
-                std::cout<<"estimated x: "<<sys->_mpc->getSolution()->xnext << "\n";
+                _mpc->run();
+                uF = _mpc->getSolution()->unext[0];
+                uPhi = _mpc->getSolution()->unext[1];
+                std::cout<<"estimated x: "<<_mpc->getSolution()->xnext << "\n";
                 std::cout << "Calculated u: [" << uF << "; " << uPhi << "] \n";
 
             }
@@ -128,10 +140,9 @@ struct epi::System::SystemImpl{
 };
 
 epi::System::System(std::shared_ptr<epi::Vehicle> vehicule,
-                    std::shared_ptr<epi::OperationModeProvider> operationModeProvider,
-                    std::unique_ptr<grampc::Grampc> controller)
+                    std::shared_ptr<epi::OperationModeProvider> operationModeProvider
+                    )
     : vehicle{vehicule}
-    , _mpc{std::move(controller)}
     , modeProvider{operationModeProvider}
     , impl{std::make_unique<SystemImpl>(this)}
     {}

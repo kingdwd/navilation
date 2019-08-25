@@ -16,9 +16,6 @@
 
 namespace epi {
 
-    namespace con{
-    }
-
     struct Point {
         double x, y;
 

@@ -40,10 +40,9 @@ int main(int arg0, char** args)
 
     QApplication app(arg0, args);
     {
-        unique_ptr<grampc::Grampc> mpc{epi::createMpc()};
         shared_ptr<OperationModeProvider> modeProvider = make_shared<OperationModeProvider>();
         shared_ptr<Vehicle> car = make_shared<Vehicle>(make_unique<DynamicCarModel>());
-        shared_ptr<System> sys = make_shared<System>(car, modeProvider, move(mpc));
+        shared_ptr<System> sys = make_shared<System>(car, modeProvider);
         ViewBuilder viewBuilder(sys);
 
         viewBuilder.show();

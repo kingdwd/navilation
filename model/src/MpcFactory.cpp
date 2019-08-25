@@ -4,21 +4,23 @@
 #include "MpcFactory.hpp"
 #include "MpcModel.hpp"
 
-grampc::Grampc* epi::createMpc(){
+void epi::createMpc(grampc::Grampc* mpc){
 
     constexpr typeInt NX = MpcModel::X_DIM;
     constexpr typeInt NU = MpcModel::U_DIM;
-
-    typeRNum FINAL_STATE_COST[NX] = {10,10,100,1,1};
-    typeRNum STATE_COST[NX] = {10,10,100,1,1};
-    typeRNum INPUT_COST[NX] = {1,100};
-
-    grampc::ProblemDescription *model = new MpcModel(FINAL_STATE_COST, STATE_COST, INPUT_COST);
-    grampc::Grampc* mpc = new grampc::Grampc(model);
+//
+//    typeRNum FINAL_STATE_COST[NX] = {10,10,100,1,1};
+//    typeRNum STATE_COST[NX] = {10,10,100,1,1};
+//    typeRNum INPUT_COST[NX] = {1,100};
+//
+//    grampc::ProblemDescription *model = new MpcModel(FINAL_STATE_COST, STATE_COST, INPUT_COST);
+//    auto mpc = std::make_unique<grampc::Grampc>(model);
 
     /********* Parameter definition *********/
     /* Initial values and setpoints of the states, inputs, parameters, penalties and Lagrangian mmultipliers, setpoints for the states and inputs */
+    //ctypeRNum x0[NX] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
 
+    //ctypeRNum xdes[NX] = { 5, -300.0, -2.0, 0.0, 0.0 };
     /* Initial values, setpoints and limits of the inputs */
     ctypeRNum u0[NU] = { 0.0, 0.0 };
     ctypeRNum udes[NU] = { 0.0, 0.0 };
@@ -26,19 +28,21 @@ grampc::Grampc* epi::createMpc(){
     ctypeRNum umin[NU] = { -1.0, -0.5 };
 
     /* Time variables */
-	ctypeRNum Thor = 3;  /* Prediction horizon */
+	ctypeRNum Thor = 0.3;  /* Prediction horizon */
 
-    ctypeRNum dt = STEP_SIZE.count(); /* Sampling time */
+    ctypeRNum dt = 0.01; /* Sampling time */
     typeRNum t = 0.0;              /* time at the current sampling step */
 
     /********* Option param definition *******/
     ctypeRNum ConstraintsAbsTol[1] = {1e-1};
 
-    ctypeInt MaxGradIter = 90;
-    ctypeInt MaxMultIter = 3;
-    ctypeInt Nhor = 30;
+    ctypeInt MaxGradIter = 60;
+    ctypeInt MaxMultIter = 1;
+    ctypeInt Nhor = 20;
 
 	/********* set parameters *********/
+    //mpc->setparam_real_vector("x0", x0);
+    //mpc->setparam_real_vector("xdes", xdes);
 	mpc->setparam_real_vector("u0", u0);
 	mpc->setparam_real_vector("udes", udes);
 	mpc->setparam_real_vector("umax", umax);
@@ -57,5 +61,5 @@ grampc::Grampc* epi::createMpc(){
     mpc->setopt_real_vector("ConstraintsAbsTol", ConstraintsAbsTol);
 
 
-    return mpc;
+    //return std::move(mpc);
 }

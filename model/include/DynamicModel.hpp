@@ -25,6 +25,7 @@ namespace epi{
 
     private:
         LimitBlock<double> _limitBlock{0.5};
+        LimitBlock<double> _limitU_F{1.0};
         class ModelImpl;
         std::unique_ptr<ModelImpl> _model;
     };

@@ -6,8 +6,9 @@
 #define EPIPHANY_MPCFACTORY_HPP
 
 #include "grampc.hpp"
+#include <memory>
 
 namespace epi{
-   grampc::Grampc* createMpc();
+   void createMpc(grampc::Grampc* mpc);
 }
 #endif //EPIPHANY_MPCFACTORY_HPP
