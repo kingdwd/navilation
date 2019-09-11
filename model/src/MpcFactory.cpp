@@ -28,7 +28,7 @@ void epi::createMpc(grampc::Grampc* mpc){
     ctypeRNum umin[NU] = { -1.0, -0.5 };
 
     /* Time variables */
-	ctypeRNum Thor = 0.3;  /* Prediction horizon */
+	ctypeRNum Thor = 0.05;  /* Prediction horizon */
 
     ctypeRNum dt = 0.01; /* Sampling time */
     typeRNum t = 0.0;              /* time at the current sampling step */
@@ -36,8 +36,8 @@ void epi::createMpc(grampc::Grampc* mpc){
     /********* Option param definition *******/
     ctypeRNum ConstraintsAbsTol[1] = {1e-1};
 
-    ctypeInt MaxGradIter = 60;
-    ctypeInt MaxMultIter = 1;
+    ctypeInt MaxGradIter = 30;
+    ctypeInt MaxMultIter = 3;
     ctypeInt Nhor = 20;
 
 	/********* set parameters *********/

@@ -5,13 +5,13 @@
 #ifndef EPIPHANY_VEHICULE_HPP
 #define EPIPHANY_VEHICULE_HPP
 
-#include "DynamicModel.hpp"
+#include "Model.hpp"
 #include "OdeSolver.hpp"
 
 namespace epi {
     class Vehicle {
     public:
-        explicit Vehicle(std::unique_ptr<DynamicModel> model
+        explicit Vehicle(std::shared_ptr<Model> model
                 , const Pose& pose = Pose{0, 0, 0}
                 , const Shape& shape = Shape{100, 20}
                 , const std::string &type = "car");
@@ -25,7 +25,7 @@ namespace epi {
 
     private:
         State state;
-        const std::unique_ptr<DynamicModel> _dynamicModel;
+        const std::shared_ptr<Model> _dynamicModel;
         const std::unique_ptr<OdeSolver> _solver
             = std::unique_ptr<RungeKutta>(new RungeKutta([this](const State& x, double uF, double uPhi){return _dynamicModel->dx(x, uF, uPhi);}));
     };

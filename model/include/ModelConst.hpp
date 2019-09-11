@@ -18,6 +18,7 @@ namespace epi{
         static constexpr double m = 1700;    /* Vehicle mass.                    */
         static constexpr double a = 1.5;     /* Distance from front axle to COG. */
         static constexpr double b = 1.5;     /* Distance from rear axle to COG.  */
+        static constexpr double l = a+b;     /* Distance from rear axle to front axle */
         static constexpr double Cx = 1.5E5;  /* Longitudinal tire stiffness.     */
         static constexpr double Cy = 4E5;    /* Lateral tire stiffness.          */
         static constexpr double CA = 1.5;    /* Air resistance coefficient.      */

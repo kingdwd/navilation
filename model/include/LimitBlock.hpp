@@ -36,7 +36,7 @@ namespace epi {
     public:
         LimitBlock(T limit) : _limit{limit} {}
 
-        T apply(const T value) override {
+        T apply(const T value) const override {
             if(std::isnan(value)) return 0;
             if (value > _limit ) return _limit;
             if(-value > _limit) return -_limit;

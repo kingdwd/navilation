@@ -13,7 +13,7 @@ epi::Deadband::Deadband(double deadzoneNeg, double deadzonePos, double gain, dou
         _offset{offset}
 {}
 
-double epi::Deadband::apply(double x) {
+double epi::Deadband::apply(double x) const {
     if(_deadzoneNeg > x) return _gain*(x-_deadzoneNeg) + _offset;
     if(_deadzonePos < x) return _gain*(x-_deadzonePos) - _offset;
     return 0;

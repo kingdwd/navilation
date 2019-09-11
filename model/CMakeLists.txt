@@ -11,8 +11,10 @@ add_library(model src/DynamicModel.cpp src/Vehicle.cpp
         include/ControlBlock.hpp include/LimitBlock.hpp include/OperationMode.hpp
         include/Vehicule.hpp
         include/LimitBlock.hpp
-        include/Spline.hpp src/Spline.cpp include/DynamicModel.hpp src/odeSolver.cpp src/System.cpp include/MpcFactory.hpp src/MpcFactory.cpp include/ModelConst.hpp)
-add_library(grampc STATIC IMPORTED include/ModelConst.hpp)
+        include/ModelConst.hpp
+        include/Model.hpp src/KinematicModel.cpp include/KinematicModel.hpp
+        include/Spline.hpp src/Spline.cpp include/DynamicModel.hpp src/odeSolver.cpp src/System.cpp include/MpcFactory.hpp src/MpcFactory.cpp include/ModelConst.hpp include/Model.hpp)
+add_library(grampc STATIC IMPORTED)
 set_target_properties(grampc PROPERTIES
         IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/grampc/lib/libgrampc.a"
         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/lib/grampc/include"

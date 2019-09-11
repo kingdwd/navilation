@@ -5,23 +5,16 @@
 #ifndef EPIPHANY_DYNAMICMODEL_HPP
 #define EPIPHANY_DYNAMICMODEL_HPP
 
-#include "data.h"
+#include "Model.hpp"
 
 namespace epi{
 
-    class DynamicModel{
-    public:
-        virtual ~DynamicModel() = default;
-        virtual State dx(const State& state, const double longitudinal, const double lateral) = 0;
-    };
-
-
-    struct DynamicCarModel : public DynamicModel {
+    struct DynamicCarModel : public Model {
 
         DynamicCarModel();
         ~DynamicCarModel();
 
-        State dx(const State& state, const double longitudinal, const double lateral) override;
+        State dx(const State& state, const double longitudinal, const double lateral) const override;
 
     private:
         LimitBlock<double> _limitBlock{0.5};

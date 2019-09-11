@@ -44,7 +44,7 @@ class Deadband : public epi::ControlBlock<double> {
         explicit Deadband(double deadzonePos, double gain = 1);
         Deadband(double deadzoneNeg, double  deadzonePos, double gain = 1, double offset = 0);
 
-        double apply(double) override;
+        double apply(double) const override;
     };
 
 }

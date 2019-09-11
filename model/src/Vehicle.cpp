@@ -4,7 +4,7 @@
 
 #include "Vehicule.hpp"
 
-epi::Vehicle::Vehicle(std::unique_ptr<epi::DynamicModel> model
+epi::Vehicle::Vehicle(std::shared_ptr<epi::Model> model
                         , const epi::Pose& pose
                         , const epi::Shape& shape
                         , const std::string& type)
@@ -15,8 +15,10 @@ epi::Vehicle::Vehicle(std::unique_ptr<epi::DynamicModel> model
     , _dynamicModel{std::move(model)}
     {}
 
-void epi::Vehicle::drive(double longitudinal, double lateral) {
-    state = _solver->next(state, longitudinal, lateral);
+void epi::Vehicle::drive(double uF, double uPhi) {
+    std::cout<<"got move command : [" <<uF <<";" <<uPhi << "] \n";
+    state = _solver->next(state, uF, uPhi);
+    std::cout<<"state: "<< state << std::endl;
     pose.set(Pose{state[0], state[1], state[2]});
 }
 

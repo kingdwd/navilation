@@ -1,0 +1,6 @@
+[requires]
+opencv/4.1.0@conan/stable
+gtest/1.8.0@bincrafters/stable
+
+[generators]
+cmake
