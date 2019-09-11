@@ -26,14 +26,6 @@
 
 using namespace std;
 using namespace epi;
-using Clock = std::chrono::high_resolution_clock ;
-using namespace cv;
-using namespace std::literals;
-
-
-
-
-
 
 int main(int arg0, char** args)
 {
