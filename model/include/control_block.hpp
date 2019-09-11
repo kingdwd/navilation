@@ -9,7 +9,7 @@ namespace epi{
     template <typename T>
     class ControlBlock{
     public:
-        virtual T apply(const T) = 0;
+        virtual T apply(const T) const = 0;
         T operator>>(const T& a){
             return apply(a);
         }

@@ -47,7 +47,7 @@ namespace epi {
             _model{std::make_unique<ModelImpl>()}
     {}
 
-    State DynamicCarModel::dx(const State& state, const double longitudinal, const double lateral) {
+    State DynamicCarModel::dx(const State& state, const double longitudinal, const double lateral) const {
         return _model->dx(state, _limitU_F.apply(longitudinal), _limitBlock.apply(lateral));
     }
 

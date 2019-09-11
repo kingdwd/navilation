@@ -26,19 +26,22 @@ public:
     constexpr static typeInt NX = MpcModel::X_DIM;
     constexpr static typeInt NU = MpcModel::U_DIM;
 
-    typeRNum FINAL_STATE_COST[NX] = {10,10,100,1,1};
-    typeRNum STATE_COST[NX] = {10,10,100,1,1};
-    typeRNum INPUT_COST[NX] = {1,100};
+    std::shared_ptr<Model> _model;
 
-    grampc::ProblemDescription *model = new MpcModel(FINAL_STATE_COST, STATE_COST, INPUT_COST);
-    grampc::Grampc* _mpc= new grampc::Grampc(model);
+    typeRNum FINAL_STATE_COST[NX] = {1,1,1000,1};
+    typeRNum STATE_COST[NX] = {1,1,1000,1};
+    typeRNum INPUT_COST[NX] = {1,10000};
+
+    grampc::ProblemDescription *_mpcModel = new MpcModel(_model, FINAL_STATE_COST, STATE_COST, INPUT_COST);
+    grampc::Grampc* _mpc= new grampc::Grampc(_mpcModel);
     System* sys;
-    SystemImpl(System* sys) : sys{sys} {
+    SystemImpl(System* sys, std::shared_ptr<Model> model) : sys{sys}, _model{model} {
         simulation = std::async(std::launch::async, &SystemImpl::run, this);
         createMpc(_mpc);
     }
     ~SystemImpl(){
         delete _mpc;
+        delete _mpcModel;
         std::cout<< "System iMPL destroyed \n";
         _run = false;
     }
@@ -74,7 +77,8 @@ public:
                 _mpc->run();
                 uF = _mpc->getSolution()->unext[0];
                 uPhi = _mpc->getSolution()->unext[1];
-                std::cout<<"estimated x: "<<_mpc->getSolution()->xnext << "\n";
+                std::cout<<"real x: "<< state << std::endl;
+                std::cout<<"estimated x: "<< State(_mpc->getSolution()->xnext) << std::endl;
                 std::cout << "Calculated u: [" << uF << "; " << uPhi << "] \n";
 
             }
@@ -84,7 +88,6 @@ public:
 
 
             auto cycle = std::chrono::duration_cast<std::chrono::milliseconds>(con::STEP_SIZE - duration);
-            std::cout<<"cycle time reserve: " << cycle.count() << "ms\n";
             if(cycle.count() > 0)
                 std::this_thread::sleep_for(cycle);
         }
@@ -140,19 +143,19 @@ public:
     }
 };
 
-epi::System::System(std::shared_ptr<epi::Vehicle> vehicule,
+epi::System::System(std::shared_ptr<epi::Vehicle> vehicle,
+                    std::shared_ptr<Model> model,
                     std::shared_ptr<epi::OperationModeProvider> operationModeProvider
                     )
-    : vehicle{vehicule}
+    : vehicle{vehicle}
     , modeProvider{operationModeProvider}
-    , impl{std::make_unique<SystemImpl>(this)}
+    , impl{std::make_unique<SystemImpl>(this, model)}
     {}
 
 void epi::System::move(double uF, double uPhi) {
     if(modeProvider->state.get() == operation_mode::MANUAL){
         impl->uF = uF;
         impl->uPhi = uPhi;
-        std::cout<<"got move command : [" <<uF <<";" <<uPhi << "] \n";
     }
 }
 

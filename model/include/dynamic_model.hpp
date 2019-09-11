@@ -21,7 +21,7 @@ namespace epi{
         DynamicCarModel();
         ~DynamicCarModel();
 
-        State dx(const State& state, const double longitudinal, const double lateral) override;
+        State dx(const State& state, const double longitudinal, const double lateral) const override;
 
     private:
         limit_block<double> _limitBlock{0.5};

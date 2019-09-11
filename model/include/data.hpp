@@ -81,7 +81,7 @@ namespace epi {
     struct DifferentialBlock: public StateBlock<V> {
         DifferentialBlock(V initialValue) : StateBlock<V>(initialValue, [](V a, V b){return b-a;}){};
     };
-    using State = cv::Vec<double, 5>;
+    using State = cv::Vec<double, 4>;
 
 
 }

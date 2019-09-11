@@ -16,6 +16,7 @@
 #include <QTextEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <KinematicModel.hpp>
 
 #include "util.h"
 
@@ -32,10 +33,11 @@ int main(int arg0, char** args)
 
     QApplication app(arg0, args);
     {
+        auto model = std::make_shared<KinematicCarModel>();
         shared_ptr<OperationModeProvider> modeProvider = make_shared<OperationModeProvider>();
-        shared_ptr<Vehicle> car = make_shared<Vehicle>(make_unique<DynamicCarModel>());
-        shared_ptr<System> sys = make_shared<System>(car, modeProvider);
-        ViewControl viewBuilder(sys);
+        shared_ptr<Vehicle> car = make_shared<Vehicle>(model);
+        shared_ptr<System> sys = make_shared<System>(car, model, modeProvider);
+        ViewBuilder viewBuilder(sys);
 
         viewBuilder.show();
     }

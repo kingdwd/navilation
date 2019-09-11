@@ -17,6 +17,7 @@ namespace epi {
     public:
 
         System(std::shared_ptr<Vehicle> vehicle
+                , std::shared_ptr<Model> model
                 , std::shared_ptr<OperationModeProvider> operationModeProvider
                 );
         ~System();
