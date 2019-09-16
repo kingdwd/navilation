@@ -5,7 +5,7 @@
 #ifndef EPIPHANY_VIEW_HPP
 #define EPIPHANY_VIEW_HPP
 
-#include "viewModel.hpp"
+#include "view_model.hpp"
 
 namespace epi{
 

@@ -8,20 +8,20 @@
 #include <opencv4/opencv2/highgui.hpp>
 #include <thread>
 #include <chrono>
-#include <Spline.hpp>
+#include <spline.hpp>
 #include "view.hpp"
-#include "UU.h"
-#include "data.h"
+#include "cv_util.hpp"
+#include "data.hpp"
 #include <QApplication>
 #include <QTextEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "U.h"
+#include "util.h"
 
-#include "viewControl.hpp"
-#include "OperationMode.hpp"
-#include "MpcFactory.hpp"
+#include "view_control.hpp"
+#include "operation_mode.hpp"
+#include "mpc_factory.hpp"
 
 
 using namespace std;
@@ -35,7 +35,7 @@ int main(int arg0, char** args)
         shared_ptr<OperationModeProvider> modeProvider = make_shared<OperationModeProvider>();
         shared_ptr<Vehicle> car = make_shared<Vehicle>(make_unique<DynamicCarModel>());
         shared_ptr<System> sys = make_shared<System>(car, modeProvider);
-        ViewBuilder viewBuilder(sys);
+        ViewControl viewBuilder(sys);
 
         viewBuilder.show();
     }

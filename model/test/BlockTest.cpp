@@ -3,10 +3,10 @@
 //
 
 #include <gtest/gtest.h>
-#include "LimitBlock.hpp"
+#include "limit_block.hpp"
 
 TEST(limit_block_test, test_limit){
-    epi::LimitBlock limitBlock(4);
+    epi::limit_block limitBlock(4);
     
     ASSERT_EQ(4, limitBlock.apply(34));
 }

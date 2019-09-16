@@ -2,10 +2,10 @@
 // Created by sigi on 12.06.19.
 //
 
-#include "DynamicModel.hpp"
-#include "Vehicule.hpp"
-#include "MpcFactory.hpp"
-#include "ModelConst.hpp"
+#include "dynamic_model.hpp"
+#include "vehicle.hpp"
+#include "mpc_factory.hpp"
+#include "model_const.hpp"
 #include <gtest/gtest.h>
 #include <math.h>
 #include <MpcModel.hpp>
