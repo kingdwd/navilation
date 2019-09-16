@@ -17,6 +17,7 @@ All methods that may be useful in other projects are for now collected in __Util
 This project has several dependencies on other libraries. These dependencies can be resolved using
 [Conan](https://www.conan.io). However, as not all libraries used are found in the conan repository, it is neccessary to
 download and install them manually into '''./lib/grampc'''.
+_this section needs more information. Build process needs a refinement_
 
 ## Requirements
 This project uses C++ v17. Thus, a compatible compiler is required.
