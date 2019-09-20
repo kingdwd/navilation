@@ -8,7 +8,7 @@
 #include "model_const.hpp"
 #include <gtest/gtest.h>
 #include <math.h>
-#include <MpcModel.hpp>
+#include <mpc_model.hpp>
 
 using namespace grampc;
 using namespace epi;
