@@ -2,7 +2,7 @@
 // Created by sigi on 12.06.19.
 //
 
-#include "dynamic_model.hpp"
+#include "kinematic_model.hpp"
 #include "vehicle.hpp"
 #include "mpc_factory.hpp"
 #include "model_const.hpp"
@@ -19,11 +19,12 @@ TEST(random_test, tester){
     constexpr typeInt NX = MpcModel::X_DIM;
     constexpr typeInt NU = MpcModel::U_DIM;
 
-    typeRNum FINAL_STATE_COST[NX] = {10,10,100,1,100};
-    typeRNum STATE_COST[NX] = {10,10,100,1,100};
+    typeRNum FINAL_STATE_COST[NX] = {10,10,100,1};
+    typeRNum STATE_COST[NX] = {10,10,100,1};
     typeRNum INPUT_COST[NX] = {1,10};
 
-    grampc::ProblemDescription *model = new MpcModel(FINAL_STATE_COST, STATE_COST, INPUT_COST);
+    auto kinModel = std::make_shared<KinematicCarModel>();
+    grampc::ProblemDescription *model = new MpcModel(kinModel, FINAL_STATE_COST, STATE_COST, INPUT_COST);
     grampc::Grampc* mpc = new grampc::Grampc(model);
     createMpc(mpc);
 
@@ -31,7 +32,7 @@ TEST(random_test, tester){
     ///* Initial values and setpoints of the states, inputs, parameters, penalties and Lagrangian mmultipliers, setpoints for the states and inputs */
     //ctypeRNum x0[NX] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
 
-    ctypeRNum xdes[NX] = { 15, -30.0, -1.5, 0.0, 0.0 };
+    ctypeRNum xdes[NX] = { 15, -30.0, -1.5, 0.0 };
     ///* Initial values, setpoints and limits of the inputs */
     //ctypeRNum u0[NU] = { 0.0, 0.0 };
     //ctypeRNum udes[NU] = { 0.0, 0.0 };
@@ -114,8 +115,6 @@ TEST(random_test, tester){
         mpc->setparam_real_vector("x0", state.val);
         std::cout<<"State of state: " << state << "\n";
         std::cout<<"Error of estim: " << e - state << "\n";
-
-
     }
 
 }
