@@ -31,10 +31,10 @@ namespace epi {
      * @tparam T
      */
     template<typename T>
-    class limit_block : public epi::ControlBlock<T> {
+    class LimitBlock : public epi::ControlBlock<T> {
         T _limit;
     public:
-        limit_block(T limit) : _limit{limit} {}
+        explicit LimitBlock(T limit) : _limit{limit} {}
 
         T apply(const T value) const override {
             if(std::isnan(value)) return 0;

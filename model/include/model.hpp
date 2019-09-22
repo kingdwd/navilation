@@ -5,11 +5,12 @@
 #ifndef EPIPHANY_MODEL_HPP
 #define EPIPHANY_MODEL_HPP
 
-#include "data.h"
+#include "data.hpp"
 
 namespace epi{
 
-    struct Model{
+    class Model{
+    public:
         virtual ~Model() = default;
         virtual State dx(const State& state, const double longitudinal, const double lateral) const = 0;
     };

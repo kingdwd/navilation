@@ -5,7 +5,7 @@
 #ifndef EPIPHANY_KINEMATICMODEL_HPP
 #define EPIPHANY_KINEMATICMODEL_HPP
 
-#include "Model.hpp"
+#include "model.hpp"
 
 namespace epi {
 

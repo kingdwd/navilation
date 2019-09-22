@@ -2,9 +2,9 @@
 // Created by sigi on 11.09.19.
 //
 
-#include "KinematicModel.hpp"
-#include "UMath.h"
-#include "ModelConst.hpp"
+#include "kinematic_model.hpp"
+#include "math_util.h"
+#include "model_const.hpp"
 
 struct epi::KinematicCarModel::ModelImpl {
     State dx(const State& x, const double u_F, const double u_phi) {

@@ -16,7 +16,7 @@
 #include <QTextEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <KinematicModel.hpp>
+#include <kinematic_model.hpp>
 
 #include "util.h"
 
@@ -37,7 +37,7 @@ int main(int arg0, char** args)
         shared_ptr<OperationModeProvider> modeProvider = make_shared<OperationModeProvider>();
         shared_ptr<Vehicle> car = make_shared<Vehicle>(model);
         shared_ptr<System> sys = make_shared<System>(car, model, modeProvider);
-        ViewBuilder viewBuilder(sys);
+        ViewControl viewBuilder(sys);
 
         viewBuilder.show();
     }

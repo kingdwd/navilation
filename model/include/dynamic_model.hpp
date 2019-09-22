@@ -6,17 +6,12 @@
 #define EPIPHANY_DYNAMICMODEL_HPP
 
 #include "data.hpp"
+#include "model.hpp"
 
 namespace epi{
 
-    class dynamic_model{
+    class DynamicCarModel : public Model {
     public:
-        virtual ~dynamic_model() = default;
-        virtual State dx(const State& state, const double longitudinal, const double lateral) = 0;
-    };
-
-
-    struct DynamicCarModel : public dynamic_model {
 
         DynamicCarModel();
         ~DynamicCarModel();
@@ -24,8 +19,8 @@ namespace epi{
         State dx(const State& state, const double longitudinal, const double lateral) const override;
 
     private:
-        limit_block<double> _limitBlock{0.5};
-        limit_block<double> _limitU_F{1.0};
+        LimitBlock<double> _limitBlock{0.5};
+        LimitBlock<double> _limitU_F{1.0};
         class ModelImpl;
         std::unique_ptr<ModelImpl> _model;
     };
