@@ -21,6 +21,7 @@ namespace epi {
     class MpcModel : public grampc::ProblemDescription {
 
         std::shared_ptr<Model> _model;
+        int iter = 0;
     /**
      * final state cost parameters
      */
@@ -68,8 +69,11 @@ public:
         //double beta =atan(b*tan(phi)/(a+b));
 
         State state = _model->dx(State{x}, u[0], u[1]);
+        //std::cout<<"calc input ["<< u[0] << ";" << u[1] <<"]\n";
         for(int i=0; i < X_DIM; i++){
             out[i] = state[i];
+            //std::cout<<"[" << iter <<"] calc estim [" << i << "]:" << x[i] << std::endl;
+            //std::cout<<"[" << iter++ <<"] calc state [" << i << "]:" << out[i] << std::endl;
         }
     }
     /** Jacobian df/dx multiplied by vector vec, i.e. (df/dx)^T*vec or vec^T*(df/dx) **/
@@ -81,7 +85,7 @@ public:
         out[0] = 0;
         out[1] = 0;
         out[2] = v*(cos(phi)*adj[1] - sin(phi)*adj[0]);
-        out[3] = cos(phi)*adj[0] + sin(phi)*adj[1] + tan(u[1])/l*adj[2] - 2*CA/m*v2*(v2 + 0.15)/pow(v2+0.1,1.5)*adj[3];
+        out[3] = cos(phi)*adj[0] + sin(phi)*adj[1] + tan(u[1])/l*adj[2] - 2*(CA+Fr)/m*v2*(v2 + 0.15)/pow(v2+0.1,1.5)*adj[3];
     }
     /** Jacobian df/du multiplied by vector vec, i.e. (df/du)^T*vec or vec^T*(df/du) **/
     void dfdu_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *adj, ctypeRNum *u, ctypeRNum *p) override {
@@ -152,7 +156,7 @@ public:
 
     /** Inequality constraints h(t,x,u,p) < 0 */
     virtual void hfct(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p) {
-        out[0] = pow(x[3]/l*tan(u[1]), 2) - 0.0001;
+        //out[0] = pow(x[3]/l*tan(u[1]), 2) - 0.0001;
     }
     /** Jacobian dh/dx multiplied by vector vec, i.e. (dh/dx)^T*vec or vec^T*(dg/dx) **/
     virtual void dhdx_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, ctypeRNum *vec) {}
