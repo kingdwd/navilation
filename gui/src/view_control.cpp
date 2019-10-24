@@ -38,8 +38,8 @@ struct epi::ViewControl::Impl {
     {}
 
     void init() {
-        std::string imageName("../../gui/data/car.png");
-        std::string mapName("../../gui/data/map.png");
+        std::string imageName("../../../gui/data/car.png");
+        std::string mapName("../../../gui/data/map.png");
 
         map = imread(mapName); // Read the file
         car_img = imread(imageName); // Read the file
