@@ -14,11 +14,11 @@ struct epi::KinematicCarModel::ModelImpl {
         double phi = x[2];
         double v = x[3];
         double sgn_v = v/sqrt(0.1 + v*v);
-        double beta =atan(b*tan(u_phi)/l);
+        double beta =b*u_phi/l;
         double dv = u_F*P/m-sgn_v*(v*v*CA+Fr)/m;
         double airRes = CA*v*v;
-        State dx{v * cos(x[2] + beta) // dx
-                , v * sin(x[2] + beta) // dy
+        State dx{v * cos(x[2]) // dx
+                , v * sin(x[2]) // dy
                 , v/b*sin(beta)
                 , dv
         };
