@@ -84,7 +84,7 @@ public:
 
         out[0] = 0;
         out[1] = 0;
-        out[2] = v*(cos(phi)*adj[1] - sin(phi)*adj[0]);
+        out[2] = U::Math::sgn(v)*v*(cos(phi)*adj[1] - sin(phi)*adj[0]);
         out[3] = cos(phi)*adj[0] + sin(phi)*adj[1] + tan(u[1])/l*adj[2] - 2*(CA+Fr)/m*v2*(v2 + 0.15)/pow(v2+0.1,1.5)*adj[3];
     }
     /** Jacobian df/du multiplied by vector vec, i.e. (df/du)^T*vec or vec^T*(df/du) **/

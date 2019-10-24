@@ -16,9 +16,9 @@ epi::Vehicle::Vehicle(std::shared_ptr<epi::Model> model
     {}
 
 void epi::Vehicle::drive(double uF, double uPhi) {
-    std::cout<<"got move command : [" <<uF <<";" <<uPhi << "] \n";
+    //std::cout<<"got move command : [" <<uF <<";" <<uPhi << "] \n";
     state = _solver->next(state, uF, uPhi);
-    std::cout<<"state: "<< state << std::endl;
+    //std::cout<<"state: "<< state << std::endl;
     pose.set(Pose{state[0], state[1], state[2]});
 }
 

@@ -33,16 +33,17 @@ std::ostream& operator<<(std::ostream& out, const std::tuple<Args...>& t) {
     print_tuple(out, t, int_<sizeof...(Args)>());
     return out << ')';
 }
-class ControllerTest : public TestWithParam<tuple<int, int, double, int, int, int>> {
+static long errorStatus = 99999999999;
+class ControllerTest : public TestWithParam<tuple<int, int, double, int, int, int, int>> {
 protected:
     virtual void SetUp(){
 
         typeRNum COST_XY = get<3>(GetParam());
         typeRNum COST_PHI = get<4>(GetParam());
         typeRNum COST_VELO = get<5>(GetParam());
-        typeRNum FINAL_STATE_COST[NX] = {COST_XY, COST_XY, COST_PHI, COST_VELO};
-        typeRNum STATE_COST[NX] = {10,10,10,1};
-        typeRNum INPUT_COST[NX] = {1,10};
+        typeRNum FINAL_STATE_COST[NX] = {COST_XY, COST_XY*10, COST_PHI, 10000};
+        typeRNum STATE_COST[NX] = {1,1,1,1};
+        typeRNum INPUT_COST[NX] = {1,1};
 
         auto kinModel = std::make_shared<KinematicCarModel>();
         grampc::ProblemDescription *model = new MpcModel(kinModel, FINAL_STATE_COST, STATE_COST, INPUT_COST);
@@ -54,7 +55,8 @@ protected:
         ///* Initial values and setpoints of the states, inputs, parameters, penalties and Lagrangian mmultipliers, setpoints for the states and inputs */
         //ctypeRNum x0[NX] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
 
-        ctypeRNum xdes[NX] = { 5, -10.0, 0, 0.0 };
+
+        ctypeRNum xdes[NX] = { desX, desY, desPhi, 0 };
         ///* Initial values, setpoints and limits of the inputs */
         //ctypeRNum u0[NU] = { 0.0, 0.0 };
         //ctypeRNum udes[NU] = { 0.0, 0.0 };
@@ -63,14 +65,14 @@ protected:
 
 
         ///********* Option param definition *******/
-        ctypeRNum ConstraintsAbsTol[5] = {1,1,0.1,100};
+        ctypeRNum ConstraintsAbsTol[5] = {1,1,0.1,10};
 
         ctypeInt MaxMultIter = get<0>(GetParam());
         ctypeInt MaxGradIter= get<1>(GetParam());
 
         ///* Time variables */
         ctypeRNum Thor = get<2>(GetParam());  /* Prediction horizon */
-        ctypeInt Nhor = 50;//Thor/dt;
+        ctypeInt Nhor = get<6>(GetParam());//Thor/dt;
 
         /********* set parameters *********/
         mpc->setparam_real_vector("xdes", xdes);
@@ -87,7 +89,7 @@ protected:
         mpc->setopt_int("MaxGradIter", MaxGradIter);
         mpc->setopt_int("MaxMultIter", MaxMultIter);
         mpc->setopt_string("ConvergenceCheck", "on");
-        //mpc->setopt_string("ScaleProblem", "on");
+        mpc->setopt_string("ScaleProblem", "on");
 
         mpc->setopt_real_vector("ConstraintsAbsTol", ConstraintsAbsTol);
         auto initState = State{0,0,0,0,0,0};
@@ -101,10 +103,15 @@ protected:
     constexpr static typeInt NX = MpcModel::X_DIM;
     constexpr static typeInt NU = MpcModel::U_DIM;
 
+    double desX = 50;
+    double desY = -100;
+    double desPhi = -0.3;
+
     typeRNum rwsReferenceIntegration[2 * NX];
     grampc::Grampc* mpc;
 
     Vehicle car{std::make_unique<epi::DynamicCarModel>()};
+    long _statusError = 0;
 };
 
 TEST_P(ControllerTest, validateOpenLoop){
@@ -133,6 +140,11 @@ TEST_P(ControllerTest, validateOpenLoop){
 
         /* check solver status */
         if (mpc->getSolution()->status > 0) {
+            _statusError += mpc->getSolution()->status;
+            if(_statusError > errorStatus) {
+                std::cout<<"Status error: " << _statusError << std::endl;
+                FAIL();
+            }
             //std::cout<<"Status error: " << mpc->getSolution()->status << std::endl;
             //mpc->printstatus(mpc->getSolution()->status, STATUS_LEVEL_WARN);
             //std::cout<< std::endl;
@@ -165,9 +177,16 @@ TEST_P(ControllerTest, validateOpenLoop){
     std::cout<<"final error of estim after " << iMPC <<": " << error << "\n";
     std::cout<<"final state of real  after " << iMPC <<": " << state<< "\n";
     std::cout<<"final state of estim after " << iMPC <<": " << estimState << "\n";
-    EXPECT_NEAR(5, estimState[0], 3);
-    EXPECT_NEAR(-10, estimState[1], 7);
-    EXPECT_NEAR(0, estimState[2], 0.3);
+    if(_statusError < errorStatus){
+        std::cout<<"error status sum: " << _statusError << "\n";
+        errorStatus = _statusError;
+        SUCCEED();
+    } else {
+        FAIL();
+    }
+    //EXPECT_NEAR(desX, estimState[0], 3);
+    //EXPECT_NEAR(desY, estimState[1], 7);
+    //EXPECT_NEAR(desPhi, estimState[2], 0.3);
     //EXPECT_LT(error[0], 10);
     //EXPECT_LT(error[1], 10);
     //EXPECT_LT(error[2], 0.2);
@@ -177,11 +196,11 @@ TEST_P(ControllerTest, validateOpenLoop){
 
 INSTANTIATE_TEST_CASE_P(MeaningfulTestParameters,
                         ControllerTest,
-                        Combine(Values(1)              //MaxMultIter
-                                , Values(5)          //MaxGradIter
-                                //, Range(5,20,5)          //Nhor
-                                , Values(1.60)   //Thor
-                                , Range(5,100, 10)        //Cost of pos x,y
-                                , Range(5,100, 10)        //Cost of angle phi
-                                , Range(5,100, 10)        //Cost of velocity
+                        Combine(Range(1,3, 1)              //MaxMultIter
+                                , Range(10,60, 10)          //MaxGradIter
+                                , Range(0.1,0.6, 0.1)   //Thor
+                                , Range(26,101, 99)        //Cost of pos x,y
+                                , Range(51,101, 99)        //Cost of angle phi
+                                , Range(1,2, 1)        //Cost of velocity
+                                , Range(5,40,5)          //Nhor
                                 ));
